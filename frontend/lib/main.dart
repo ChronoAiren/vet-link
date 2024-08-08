@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/presentation/register/clinic_owner/page/register_co_screen.dart';
 import 'package:frontend/features/auth/presentation/register/pet_owner/page/register_screen.dart';
 import 'package:frontend/splash_screen.dart';
 import 'package:frontend/styles/dark_theme.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/register': (context) => RegisterPetOwnerScreen(),
+        '/register_co': (context) => RegisterClinicOwnerScreen(),
       },
     );
   }
