@@ -39,7 +39,6 @@ class CustomTextField extends StatelessWidget {
       enabled: enabled,
       controller: controller,
       minLines: minLines,
-      keyboardType: keyboardType,
       obscureText: obscureText,
       decoration: InputDecoration(
         filled: true,
