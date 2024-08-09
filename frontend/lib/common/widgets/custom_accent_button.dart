@@ -7,11 +7,13 @@ class CustomAccentButton extends StatelessWidget {
     required this.onPressed,
     required this.buttonLabel,
     this.withShadow = false,
+    this.isOutlined = false,
   });
 
   final Function() onPressed;
   final String buttonLabel;
   final bool withShadow;
+  final bool isOutlined;
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +26,17 @@ class CustomAccentButton extends StatelessWidget {
         ),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: lightAccentColor,
+          border: isOutlined
+              ? Border.all(color: lightAccentColor, width: 3.0)
+              : null,
+          color: isOutlined ? Colors.transparent : lightAccentColor,
           borderRadius: const BorderRadius.all(
             Radius.circular(10.0),
           ),
           boxShadow: withShadow
               ? [
                   const BoxShadow(
-                    color: lightDarkNeutralColor,
+                    color: Colors.grey,
                     offset: Offset(0, 2),
                     blurRadius: 5.0,
                     spreadRadius: 1.0,
@@ -42,9 +47,9 @@ class CustomAccentButton extends StatelessWidget {
         child: Text(
           buttonLabel,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 17.0,
-            color: Colors.white,
+            color: isOutlined ? lightAccentColor : Colors.white,
           ),
         ),
       ),

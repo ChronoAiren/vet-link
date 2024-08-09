@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/common/widgets/custom_accent_button.dart';
 import 'package:frontend/common/widgets/custom_primary_button.dart';
-import 'package:frontend/features/auth/presentation/register/clinic_owner/widgets/register_form.dart';
+import 'package:frontend/common/widgets/cutom_text_field.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
+import 'package:get/get.dart';
 
-class RegisterPetOwnerScreen extends StatelessWidget {
-  RegisterPetOwnerScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  LoginScreen({super.key});
+
+  final RxBool isObscurePw = true.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -74,31 +77,48 @@ class RegisterPetOwnerScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        RegisterForm(),
+                        Form(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CustomTextField(
+                                prefixIcon: Icon(Icons.email_rounded),
+                                labelText: 'Email',
+                                floatLabel: true,
+                              ),
+                              const SizedBox(
+                                height: 15.0,
+                              ),
+                              Obx(
+                                () => CustomTextField(
+                                  borderRadius: BorderRadius.circular(5),
+                                  floatLabel: true,
+                                  labelText: 'Password',
+                                  prefixIcon: const Icon(Icons.lock),
+                                  obscureText: isObscurePw.value,
+                                  suffixIcon: IconButton(
+                                    onPressed: () {
+                                      isObscurePw.value = !(isObscurePw.value);
+                                    },
+                                    icon: Icon(
+                                      isObscurePw.value
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         const SizedBox(
                           height: 22.0,
                         ),
                         CustomAccentButton(
-                          buttonLabel: 'Register',
-                          onPressed: () {},
-                        ),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/register_co');
-                            },
-                            child: const Text(
-                              'Register as Clinic Owner',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
+                          buttonLabel: 'Login',
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/home');
+                          },
                         ),
                         const SizedBox(
                           height: 20.0,
@@ -116,7 +136,7 @@ class RegisterPetOwnerScreen extends StatelessWidget {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
-                                'or Login Your Account',
+                                'or Register New Account',
                                 style: captionSemiboldPoppins.copyWith(
                                     color: lightNeutralColor),
                               ),
@@ -133,9 +153,9 @@ class RegisterPetOwnerScreen extends StatelessWidget {
                           height: 20.0,
                         ),
                         CustomPrimaryButton(
-                          buttonLabel: 'Login',
+                          buttonLabel: 'Register',
                           onPressed: () {
-                            Navigator.popAndPushNamed(context, '/login');
+                            Navigator.popAndPushNamed(context, '/register');
                           },
                         ),
                       ],
