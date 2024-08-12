@@ -44,13 +44,15 @@ InputDecorationTheme lightInputDecorationTheme = InputDecorationTheme(
       width: 2,
     ),
   ),
+  suffixIconColor: lightNeutralColor,
+  prefixIconColor: lightNeutralColor,
   hintStyle: const TextStyle(
     color: lightNeutralColor,
     fontSize: 14,
     fontFamily: 'Poppins',
   ),
   labelStyle: const TextStyle(
-    color: lightOnBackgroundColor,
+    color: lightNeutralColor,
     fontSize: 14,
     fontFamily: 'Poppins',
   ),
@@ -65,6 +67,7 @@ ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: lightPrimaryColor,
   hintColor: lightAccentColor,
+  cardColor: Colors.white,
   scaffoldBackgroundColor: lightBackgroundColor,
   textTheme: lightTextTheme,
   buttonTheme: const ButtonThemeData(

@@ -221,7 +221,6 @@ class ViewStaffsScreen extends StatelessWidget {
                             clinicStaffs.removeRange(index, index);
                           },
                           child: Card(
-                            color: Colors.white,
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Row(

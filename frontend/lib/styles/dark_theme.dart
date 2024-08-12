@@ -31,7 +31,7 @@ const Color darkOnSurfaceColor =
 
 InputDecorationTheme darkInputDecorationTheme = InputDecorationTheme(
   filled: true,
-  fillColor: darkBackgroundColor, // Background color for the input field
+  fillColor: Colors.white, // Background color for the input field
   enabledBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(8),
     borderSide: const BorderSide(
@@ -46,13 +46,15 @@ InputDecorationTheme darkInputDecorationTheme = InputDecorationTheme(
       width: 2,
     ),
   ),
+  suffixIconColor: darkNeutralColor,
+  prefixIconColor: darkNeutralColor,
   hintStyle: const TextStyle(
     color: darkNeutralColor,
     fontSize: 16,
     fontFamily: 'Poppins',
   ),
   labelStyle: const TextStyle(
-    color: darkOnBackgroundColor,
+    color: darkNeutralColor,
     fontSize: 16,
     fontFamily: 'Poppins',
   ),
@@ -67,6 +69,7 @@ ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   primaryColor: darkPrimaryColor,
   hintColor: darkAccentColor,
+  shadowColor: Colors.red,
   scaffoldBackgroundColor: darkBackgroundColor,
   textTheme: darkTextTheme,
   buttonTheme: const ButtonThemeData(

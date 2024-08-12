@@ -104,7 +104,6 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.only(bottom: 30.0),
                       child: Card(
-                        color: Colors.white,
                         child: Padding(
                           padding: EdgeInsets.all(12.0),
                           child: Column(

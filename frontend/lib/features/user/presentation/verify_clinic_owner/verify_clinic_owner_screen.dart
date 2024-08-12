@@ -264,7 +264,6 @@ class VerifyClinicOwnerScreen extends StatelessWidget {
                           );
                         },
                         child: Card(
-                          color: Colors.white,
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Column(

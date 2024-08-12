@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/styles/dark_theme.dart';
+import 'package:frontend/styles/light_theme.dart';
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
@@ -41,7 +43,7 @@ class CustomTextField extends StatelessWidget {
       minLines: minLines,
       obscureText: obscureText,
       decoration: InputDecoration(
-        filled: true,
+        filled: Theme.of(context).brightness != Brightness.dark,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12.0,
           vertical: 14.0,
@@ -51,10 +53,13 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: prefixIcon,
         labelText: labelText,
       ),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         fontFamily: 'Poppins',
+        color: Theme.of(context).brightness == Brightness.dark
+            ? darkNeutralColor
+            : lightDarkNeutralColor,
       ),
       inputFormatters: inputFormatters,
       onFieldSubmitted: (value) {

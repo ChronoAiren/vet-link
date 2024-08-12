@@ -6,12 +6,12 @@ import 'package:frontend/common/widgets/cutom_text_field.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' as getx;
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final RxBool isObscurePw = true.obs;
+  final getx.RxBool isObscurePw = true.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +38,8 @@ class LoginScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.start,
                   children: [
                     Image.asset(
                       'assets/logos/icon-vetlink.png',
@@ -68,97 +68,104 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(
                   height: 30.0,
                 ),
-                Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Form(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const CustomTextField(
-                                prefixIcon: Icon(Icons.email_rounded),
-                                labelText: 'Email',
-                                floatLabel: true,
-                              ),
-                              const SizedBox(
-                                height: 15.0,
-                              ),
-                              Obx(
-                                () => CustomTextField(
-                                  borderRadius: BorderRadius.circular(5),
-                                  floatLabel: true,
-                                  labelText: 'Password',
-                                  prefixIcon: const Icon(Icons.lock),
-                                  obscureText: isObscurePw.value,
-                                  suffixIcon: IconButton(
-                                    onPressed: () {
-                                      isObscurePw.value = !(isObscurePw.value);
-                                    },
-                                    icon: Icon(
-                                      isObscurePw.value
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
+                Center(
+                  child: Card(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 400,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Form(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CustomTextField(
+                                    prefixIcon: Icon(Icons.email_rounded),
+                                    labelText: 'Email',
+                                    floatLabel: true,
+                                  ),
+                                  const SizedBox(
+                                    height: 15.0,
+                                  ),
+                                  getx.Obx(
+                                    () => CustomTextField(
+                                      borderRadius: BorderRadius.circular(5),
+                                      floatLabel: true,
+                                      labelText: 'Password',
+                                      prefixIcon: const Icon(Icons.lock),
+                                      obscureText: isObscurePw.value,
+                                      suffixIcon: IconButton(
+                                        onPressed: () {
+                                          isObscurePw.value =
+                                              !(isObscurePw.value);
+                                        },
+                                        icon: Icon(
+                                          isObscurePw.value
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
+                                        ),
+                                      ),
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 22.0,
+                            ),
+                            CustomAccentButton(
+                              buttonLabel: 'Login',
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/home');
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Expanded(
+                                  child: Divider(
+                                    thickness: 1,
+                                    color: lightNeutralColor,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 22.0,
-                        ),
-                        CustomAccentButton(
-                          buttonLabel: 'Login',
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/home');
-                          },
-                        ),
-                        const SizedBox(
-                          height: 20.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Expanded(
-                              child: Divider(
-                                thickness: 1,
-                                color: lightNeutralColor,
-                              ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Text(
+                                    'or Register New Account',
+                                    style: captionSemiboldPoppins.copyWith(
+                                        color: lightNeutralColor),
+                                  ),
+                                ),
+                                const Expanded(
+                                  child: Divider(
+                                    thickness: 1,
+                                    color: lightNeutralColor,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'or Register New Account',
-                                style: captionSemiboldPoppins.copyWith(
-                                    color: lightNeutralColor),
-                              ),
+                            const SizedBox(
+                              height: 20.0,
                             ),
-                            const Expanded(
-                              child: Divider(
-                                thickness: 1,
-                                color: lightNeutralColor,
-                              ),
+                            CustomPrimaryButton(
+                              buttonLabel: 'Register',
+                              onPressed: () {
+                                Navigator.popAndPushNamed(context, '/register');
+                              },
                             ),
                           ],
                         ),
-                        const SizedBox(
-                          height: 20.0,
-                        ),
-                        CustomPrimaryButton(
-                          buttonLabel: 'Register',
-                          onPressed: () {
-                            Navigator.popAndPushNamed(context, '/register');
-                          },
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

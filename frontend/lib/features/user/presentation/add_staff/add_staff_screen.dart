@@ -226,6 +226,7 @@ class AddStaffScreen extends StatelessWidget {
                             'Using default password of "12345". \nPlease advise employees to change their passwords.',
                             style: captionRegularPoppins.copyWith(
                               fontStyle: FontStyle.italic,
+                              color: lightOnSurfaceColor,
                             ),
                           ),
                         ),
