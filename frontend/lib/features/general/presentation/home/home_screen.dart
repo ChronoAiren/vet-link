@@ -47,15 +47,6 @@ class HomeScreen extends StatelessWidget {
         body: Container(
           height: MediaQuery.of(context).size.height,
           padding: const EdgeInsets.only(left: 15.0, right: 15.0, top: 15.0),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'assets/logos/bg-vetlink.png',
-              ),
-              fit: BoxFit.fitWidth,
-              alignment: Alignment.bottomCenter,
-            ),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
