@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/common/controllers/drawer_controller.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
-import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
-import 'package:get/get.dart';
 
 class VerifyClinicOwnerScreen extends StatelessWidget {
   VerifyClinicOwnerScreen({super.key});

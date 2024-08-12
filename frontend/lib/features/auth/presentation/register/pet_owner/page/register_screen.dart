@@ -8,7 +8,7 @@ import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
 
 class RegisterPetOwnerScreen extends StatelessWidget {
-  RegisterPetOwnerScreen({super.key});
+  const RegisterPetOwnerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

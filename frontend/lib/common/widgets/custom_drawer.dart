@@ -92,7 +92,8 @@ class CustomDrawer extends StatelessWidget {
               const Divider(),
               ListTile(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0)),
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
                 leading: Icon(
                   Icons.logout,
                   size: 24.0,

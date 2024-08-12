@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 class RegisterClinicOwnerScreen extends StatelessWidget {
   RegisterClinicOwnerScreen({super.key});
 
-  RxInt activeStep = 1.obs;
+  final RxInt activeStep = 1.obs;
 
   void prevStep() {
     if (activeStep.value > 1) {
