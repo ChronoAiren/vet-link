@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/common/controllers/bindings.dart';
 import 'package:frontend/features/auth/presentation/login/login_screen.dart';
 import 'package:frontend/features/auth/presentation/register/clinic_owner/page/register_co_screen.dart';
 import 'package:frontend/features/auth/presentation/register/pet_owner/page/register_screen.dart';
@@ -9,6 +10,7 @@ import 'package:frontend/features/user/presentation/view_staffs/view_staffs_scre
 import 'package:frontend/splash_screen.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
+import 'package:get/get.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 Future<void> main() async {
@@ -21,7 +23,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      initialBinding: AllControllerBinding(),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         breakpoints: [
           const Breakpoint(start: 0, end: 450, name: MOBILE),
@@ -35,18 +38,20 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => LoginScreen(),
-        '/register': (context) => RegisterPetOwnerScreen(),
-        '/register_co': (context) => RegisterClinicOwnerScreen(),
-        '/verify_clinic_owner': (context) => VerifyClinicOwnerScreen(),
-        '/view_staffs': (context) => ViewStaffsScreen(),
-        '/add_staff': (context) => AddStaffScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
+      themeMode: ThemeMode.light,
+      initialRoute: '/home',
+      getPages: [
+        // '/': (context) => const SplashScreen(),
+        GetPage(name: '/login', page: () => LoginScreen()),
+        GetPage(name: '/register', page: () => RegisterPetOwnerScreen()),
+        GetPage(name: '/register_co', page: () => RegisterClinicOwnerScreen()),
+        GetPage(
+            name: '/verify_clinic_owner',
+            page: () => VerifyClinicOwnerScreen()),
+        GetPage(name: '/view_staffs', page: () => ViewStaffsScreen()),
+        GetPage(name: '/add_staff', page: () => AddStaffScreen()),
+        GetPage(name: '/home', page: () => HomeScreen()),
+      ],
     );
   }
 }
