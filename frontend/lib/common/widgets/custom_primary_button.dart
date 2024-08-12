@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 
 class CustomPrimaryButton extends StatelessWidget {
@@ -7,16 +8,18 @@ class CustomPrimaryButton extends StatelessWidget {
     required this.onPressed,
     required this.buttonLabel,
     this.withShadow = false,
+    this.enabled = true,
   });
 
   final Function() onPressed;
   final String buttonLabel;
   final bool withShadow;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onPressed,
+      onTap: enabled ? onPressed : null,
       child: Container(
         padding: const EdgeInsets.symmetric(
           vertical: 15.0,
@@ -24,14 +27,14 @@ class CustomPrimaryButton extends StatelessWidget {
         ),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: lightSecondaryColor,
+          color: enabled ? lightSecondaryColor : Colors.grey[300],
           borderRadius: const BorderRadius.all(
             Radius.circular(10.0),
           ),
           boxShadow: withShadow
               ? [
                   const BoxShadow(
-                    color: lightDarkNeutralColor,
+                    color: Colors.grey,
                     offset: Offset(0, 2),
                     blurRadius: 5.0,
                     spreadRadius: 1.0,
@@ -42,9 +45,9 @@ class CustomPrimaryButton extends StatelessWidget {
         child: Text(
           buttonLabel,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 17.0,
-            color: Colors.white,
+            color: enabled ? Colors.white : Colors.grey[400],
           ),
         ),
       ),

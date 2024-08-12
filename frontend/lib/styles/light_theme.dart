@@ -29,29 +29,31 @@ const Color lightOnSurfaceColor =
 
 InputDecorationTheme lightInputDecorationTheme = InputDecorationTheme(
   filled: true,
-  fillColor: lightBackgroundColor, // Background color for the input field
+  fillColor: lightBackgroundColor,
   enabledBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(8),
     borderSide: const BorderSide(
-      color: lightDarkNeutralColor, // Color of the border when not focused
+      color: lightDarkNeutralColor,
       width: 2,
     ),
   ),
   focusedBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(8),
     borderSide: const BorderSide(
-      color: lightAccentColor, // Color of the border when focused
+      color: lightAccentColor,
       width: 2,
     ),
   ),
+  suffixIconColor: lightNeutralColor,
+  prefixIconColor: lightNeutralColor,
   hintStyle: const TextStyle(
     color: lightNeutralColor,
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Poppins',
   ),
   labelStyle: const TextStyle(
-    color: lightOnBackgroundColor,
-    fontSize: 16,
+    color: lightNeutralColor,
+    fontSize: 14,
     fontFamily: 'Poppins',
   ),
   errorStyle: const TextStyle(
@@ -65,6 +67,7 @@ ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: lightPrimaryColor,
   hintColor: lightAccentColor,
+  cardColor: Colors.white,
   scaffoldBackgroundColor: lightBackgroundColor,
   textTheme: lightTextTheme,
   buttonTheme: const ButtonThemeData(
