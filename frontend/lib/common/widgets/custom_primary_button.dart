@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 
 class CustomPrimaryButton extends StatelessWidget {
