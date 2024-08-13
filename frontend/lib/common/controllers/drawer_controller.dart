@@ -14,11 +14,7 @@ class CustomDrawerController extends GetxController {
 
   bool isDrawerOpen() => isMobileDrawerOpened.value;
 
-  loadCurrentRoute() {
-    final String initialRoute = Get.currentRoute;
-    activeRoute.value = initialRoute.isNotEmpty ? initialRoute : '/home';
-    debugPrint(initialRoute);
-  }
+  void setActiveRoute(String route) => activeRoute.value = route;
 
   void goTo(String route) {
     if (kIsWeb) {

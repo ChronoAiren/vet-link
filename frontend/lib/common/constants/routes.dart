@@ -2,6 +2,8 @@ import 'package:frontend/features/auth/presentation/login/login_screen.dart';
 import 'package:frontend/features/auth/presentation/register/clinic_owner/register_co_screen.dart';
 import 'package:frontend/features/auth/presentation/register/pet_owner/register_screen.dart';
 import 'package:frontend/features/general/presentation/home/home_screen.dart';
+import 'package:frontend/features/pet/presentation/add_pet/add_pet_screen.dart';
+import 'package:frontend/features/pet/presentation/view_pet/view_pet_screen.dart';
 import 'package:frontend/features/user/presentation/add_staff/add_staff_screen.dart';
 import 'package:frontend/features/user/presentation/verify_clinic_owner/verify_clinic_owner_screen.dart';
 import 'package:frontend/features/user/presentation/view_staffs/view_staffs_screen.dart';
@@ -20,5 +22,7 @@ class AppPages {
     GetPage(name: '/view_staffs', page: () => ViewStaffsScreen()),
     GetPage(name: '/add_staff', page: () => AddStaffScreen()),
     GetPage(name: '/home', page: () => const HomeScreen()),
+    GetPage(name: '/view_pets', page: () => ViewPetScreen()),
+    GetPage(name: '/add_pet', page: () => const AddPetScreen()),
   ];
 }
