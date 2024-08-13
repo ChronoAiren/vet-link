@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:frontend/common/constants/routes.dart';
-import 'package:frontend/common/controllers/bindings.dart';
+import 'package:frontend/common/controllers/_bindings.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:get/get.dart';
