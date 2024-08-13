@@ -8,8 +8,8 @@ jobs:
   assign-reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: Assign PR to reviewer
-        uses: kentaro-m/auto-assign-action@v1.2.0
+      - name: Assign Reviewers
+        uses: kentaro-m/auto-assign-action@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reviewers: 'mizukageyama'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/auto-assign-reviewer.yml
