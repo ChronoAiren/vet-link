@@ -6,35 +6,51 @@ import (
 	"net/http"
 )
 
-func (s *Service) login(ctx context.Context, r LoginRequest) (int, *mysqlc.User) {
-	user, err := s.store.GetUserByEmail(ctx, r.Email)
-	if err != nil {
+func (s *Service) login(ctx context.Context, r LoginRequest) (int, *UserDTO) {
+	if user, err := s.store.GetUserByEmail(ctx, r.Email); err != nil {
 		return http.StatusNotFound, nil
-	}
-	if user.Password != r.Password {
+	} else if user.Password != r.Password {
 		return http.StatusUnauthorized, nil
+	} else {
+		return http.StatusOK, &UserDTO{
+			user.ID,
+			user.GivenName,
+			user.FamilyName,
+			user.Email,
+			user.Role,
+		}
 	}
-	return http.StatusOK, &user
 }
 
-func (s *Service) registerPetOwner(ctx context.Context, r RegisterPetOwnerRequest) (int, *mysqlc.User) {
-	if existingUser, err := s.store.GetUserByEmail(ctx, r.Email); err != nil {
-		return http.StatusInternalServerError, nil
-	} else if existingUser.Email == r.Email {
-		return http.StatusConflict, nil
-	}
-	if result, err := s.store.CreateUser(ctx, mysqlc.CreateUserParams{
+func (s *Service) register(ctx context.Context, r RegisterRequest) (int, *UserDTO) {
+	if _, err := s.store.CreateUser(ctx, mysqlc.CreateUserParams{
 		GivenName:  r.GivenName,
 		FamilyName: r.FamilyName,
-		Email:      r.Email,
-		Password:   r.Password,
+		Email:      r.Credentials.Email,
+		Password:   r.Credentials.Password,
 	}); err != nil {
-		return http.StatusInternalServerError, nil
-	} else if rows, err := result.RowsAffected(); rows == 0 || err != nil {
-		return http.StatusConflict, nil
+		return http.StatusBadRequest, nil
 	}
-	return s.login(ctx, LoginRequest{
-		Email:    r.Email,
-		Password: r.Password,
-	})
+	return s.login(ctx, r.Credentials)
+}
+
+func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (int, *mysqlc.ClinicRow) {
+	code, user := s.register(ctx, r.User)
+	if code != http.StatusOK || user == nil {
+		return http.StatusBadRequest, nil
+	}
+	if result, err := s.store.CreateClinic(ctx, mysqlc.CreateClinicParams{
+		UserID:     user.ID,
+		Name:       r.Name,
+		Location:   r.Location,
+		BusinessNo: r.BusinessNo,
+	}); err != nil {
+		return http.StatusBadRequest, nil
+	} else if clinicID, err := result.LastInsertId(); err != nil {
+		return http.StatusBadRequest, nil
+	} else if clinic, err := s.store.Clinic(ctx, uint32(clinicID)); err != nil {
+		return http.StatusBadRequest, nil
+	} else {
+		return http.StatusOK, &clinic
+	}
 }

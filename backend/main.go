@@ -2,19 +2,18 @@ package main
 
 import (
 	"backend/auth"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 )
 
-func run() (err error) {
+func run() error {
 	backend := echo.New()
 
 	authSvc := auth.New(database, backend)
-	authSvc.RegisterRoutes()
+	authSvc.AddRoutes()
 
-	address := fmt.Sprintf(":%s", env["BE_PORT"])
-	if err = backend.Start(address); err != nil {
+	address := ":" + env["BE_PORT"]
+	if err := backend.Start(address); err != nil {
 		return err
 	}
 	return nil
