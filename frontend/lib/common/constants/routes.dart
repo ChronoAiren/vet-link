@@ -1,6 +1,6 @@
 import 'package:frontend/features/auth/presentation/login/login_screen.dart';
-import 'package:frontend/features/auth/presentation/register/clinic_owner/page/register_co_screen.dart';
-import 'package:frontend/features/auth/presentation/register/pet_owner/page/register_screen.dart';
+import 'package:frontend/features/auth/presentation/register/clinic_owner/register_co_screen.dart';
+import 'package:frontend/features/auth/presentation/register/pet_owner/register_screen.dart';
 import 'package:frontend/features/general/presentation/home/home_screen.dart';
 import 'package:frontend/features/user/presentation/add_staff/add_staff_screen.dart';
 import 'package:frontend/features/user/presentation/verify_clinic_owner/verify_clinic_owner_screen.dart';

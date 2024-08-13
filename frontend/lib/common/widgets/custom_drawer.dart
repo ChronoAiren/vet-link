@@ -13,8 +13,6 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    controller.loadCurrentRoute();
-
     return Drawer(
       shape: const RoundedRectangleBorder(),
       child: SingleChildScrollView(

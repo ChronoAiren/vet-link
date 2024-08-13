@@ -22,6 +22,8 @@ class MainWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    drawerController.loadCurrentRoute();
+
     return SafeArea(
       child: Scaffold(
         drawer: CustomDrawer(
