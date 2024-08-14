@@ -8,7 +8,7 @@ import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
 
 class RegisterPetOwnerScreen extends StatelessWidget {
-  RegisterPetOwnerScreen({super.key});
+  const RegisterPetOwnerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +35,8 @@ class RegisterPetOwnerScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.start,
                   children: [
                     Image.asset(
                       'assets/logos/icon-vetlink.png',
@@ -65,80 +65,86 @@ class RegisterPetOwnerScreen extends StatelessWidget {
                 const SizedBox(
                   height: 30.0,
                 ),
-                Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        RegisterForm(),
-                        const SizedBox(
-                          height: 22.0,
-                        ),
-                        CustomAccentButton(
-                          buttonLabel: 'Register',
-                          onPressed: () {},
-                        ),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/register_co');
-                            },
-                            child: const Text(
-                              'Register as Clinic Owner',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 20.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                Center(
+                  child: Card(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 400,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            const Expanded(
-                              child: Divider(
-                                thickness: 1,
-                                color: lightNeutralColor,
+                            RegisterForm(),
+                            const SizedBox(
+                              height: 22.0,
+                            ),
+                            CustomAccentButton(
+                              buttonLabel: 'Register',
+                              onPressed: () {},
+                            ),
+                            const SizedBox(
+                              height: 10.0,
+                            ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/register_co');
+                                },
+                                child: const Text(
+                                  'Register as Clinic Owner',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
                               ),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'or Login Your Account',
-                                style: captionSemiboldPoppins.copyWith(
-                                    color: lightNeutralColor),
-                              ),
+                            const SizedBox(
+                              height: 20.0,
                             ),
-                            const Expanded(
-                              child: Divider(
-                                thickness: 1,
-                                color: lightNeutralColor,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Expanded(
+                                  child: Divider(
+                                    thickness: 1,
+                                    color: lightNeutralColor,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Text(
+                                    'or Login Your Account',
+                                    style: captionSemiboldPoppins.copyWith(
+                                        color: lightNeutralColor),
+                                  ),
+                                ),
+                                const Expanded(
+                                  child: Divider(
+                                    thickness: 1,
+                                    color: lightNeutralColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            CustomPrimaryButton(
+                              buttonLabel: 'Login',
+                              onPressed: () {
+                                Navigator.popAndPushNamed(context, '/login');
+                              },
                             ),
                           ],
                         ),
-                        const SizedBox(
-                          height: 20.0,
-                        ),
-                        CustomPrimaryButton(
-                          buttonLabel: 'Login',
-                          onPressed: () {
-                            Navigator.popAndPushNamed(context, '/login');
-                          },
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

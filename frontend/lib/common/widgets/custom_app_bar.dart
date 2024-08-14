@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/styles/light_theme.dart';
 
@@ -9,6 +10,7 @@ class CustomAppBar extends StatelessWidget {
     return PreferredSize(
       preferredSize: const Size.fromHeight(60.0),
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           color: lightSecondaryColor,
@@ -23,13 +25,21 @@ class CustomAppBar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              color: Colors.white,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
+            !kIsWeb && Navigator.canPop(context)
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.menu),
+                    color: Colors.white,
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                  ),
           ],
         ),
       ),

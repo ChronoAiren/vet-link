@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/styles/dark_theme.dart';
+import 'package:frontend/common/widgets/main_wrapper.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
 
@@ -75,221 +74,151 @@ class VerifyClinicOwnerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(60.0),
-          child: Container(
-            padding: const EdgeInsets.all(5.0),
-            decoration: BoxDecoration(
-              color: lightSecondaryColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 1,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+    return MainWrapper(
+      content: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+              decoration: const BoxDecoration(
+                color: lightSecondaryColor,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(15.0),
                 ),
-              ],
+              ),
+              child: Text(
+                'Clinic Registration Request',
+                style: captionBoldPoppins.copyWith(color: Colors.white),
+              ),
             ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+            const SizedBox(
+              height: 15.0,
             ),
-          ),
-        ),
-        body: Container(
-          height: MediaQuery.of(context).size.height,
-          padding: const EdgeInsets.only(left: 15.0, right: 15.0, top: 15.0),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'assets/logos/bg-vetlink.png',
-              ),
-              fit: BoxFit.fitWidth,
-              alignment: Alignment.bottomCenter,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/logos/icon-vetlink.png',
-                    width: 60.0,
+            Expanded(
+              child: ListView.builder(
+                  padding: const EdgeInsets.only(
+                    bottom: 15.0,
                   ),
-                  const SizedBox(
-                    width: 10.0,
-                  ),
-                  SvgPicture.asset(
-                    'assets/logos/logo-first-vetlink.svg',
-                    semanticsLabel: 'VetLink Logo',
-                    height: 60.0,
-                  ),
-                  SvgPicture.asset(
-                    'assets/logos/logo-second-vetlink.svg',
-                    semanticsLabel: 'VetLink Logo',
-                    colorFilter: ColorFilter.mode(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? darkAccentColor
-                            : Colors.black,
-                        BlendMode.srcIn),
-                    height: 60.0,
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
-                decoration: const BoxDecoration(
-                  color: lightSecondaryColor,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(15.0),
-                  ),
-                ),
-                child: Text(
-                  'Clinic Registration Request',
-                  style: captionBoldPoppins.copyWith(color: Colors.white),
-                ),
-              ),
-              const SizedBox(
-                height: 15.0,
-              ),
-              Expanded(
-                child: ListView.builder(
-                    padding: const EdgeInsets.only(
-                      bottom: 15.0,
-                    ),
-                    shrinkWrap: true,
-                    itemCount: clinicOwnerRegistration.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text(
-                                  'Registration Request',
-                                  style: bodyBoldPoppins,
-                                ),
-                                content: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      'Name',
-                                      style: smallSemiboldPoppins,
-                                    ),
-                                    Text(
-                                      '${clinicOwnerRegistration[index]['firstName']} ${clinicOwnerRegistration[index]['lastName']}',
-                                      style: smallRegularPoppins,
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    const Text(
-                                      'Clinic',
-                                      style: smallSemiboldPoppins,
-                                    ),
-                                    Text(
-                                      '${clinicOwnerRegistration[index]['clinic']}',
-                                      style: smallRegularPoppins,
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    const Text(
-                                      'Location',
-                                      style: smallSemiboldPoppins,
-                                    ),
-                                    Text(
-                                      '${clinicOwnerRegistration[index]['location']}',
-                                      style: smallRegularPoppins,
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    const Text(
-                                      'Business Permit',
-                                      style: smallSemiboldPoppins,
-                                    ),
-                                    Text(
-                                      '${clinicOwnerRegistration[index]['businessPermit']}',
-                                      style: smallRegularPoppins,
-                                    ),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    child: const Text(
-                                      'Decline',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Close the dialog
-                                    },
+                  shrinkWrap: true,
+                  itemCount: clinicOwnerRegistration.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text(
+                                'Registration Request',
+                                style: bodyBoldPoppins,
+                              ),
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Name',
+                                    style: smallSemiboldPoppins,
                                   ),
-                                  TextButton(
-                                    child: const Text(
-                                      'Approve',
-                                      style: TextStyle(
-                                        color: lightSecondaryColor,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Close the dialog
-                                    },
+                                  Text(
+                                    '${clinicOwnerRegistration[index]['firstName']} ${clinicOwnerRegistration[index]['lastName']}',
+                                    style: smallRegularPoppins,
+                                  ),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  const Text(
+                                    'Clinic',
+                                    style: smallSemiboldPoppins,
+                                  ),
+                                  Text(
+                                    '${clinicOwnerRegistration[index]['clinic']}',
+                                    style: smallRegularPoppins,
+                                  ),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  const Text(
+                                    'Location',
+                                    style: smallSemiboldPoppins,
+                                  ),
+                                  Text(
+                                    '${clinicOwnerRegistration[index]['location']}',
+                                    style: smallRegularPoppins,
+                                  ),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  const Text(
+                                    'Business Permit',
+                                    style: smallSemiboldPoppins,
+                                  ),
+                                  Text(
+                                    '${clinicOwnerRegistration[index]['businessPermit']}',
+                                    style: smallRegularPoppins,
                                   ),
                                 ],
-                              );
-                            },
-                          );
-                        },
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${clinicOwnerRegistration[index]['clinic']}',
-                                  style: bodyRegularPoppins,
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: const Text(
+                                    'Decline',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pop(); // Close the dialog
+                                  },
                                 ),
-                                Text(
-                                  '${clinicOwnerRegistration[index]['location']}',
-                                  style: smallSemiboldPoppins,
-                                ),
-                                Text(
-                                  'Owned by: ${clinicOwnerRegistration[index]['firstName']} ${clinicOwnerRegistration[index]['lastName']}',
-                                  style: smallRegularPoppins,
+                                TextButton(
+                                  child: const Text(
+                                    'Approve',
+                                    style: TextStyle(
+                                      color: lightSecondaryColor,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pop(); // Close the dialog
+                                  },
                                 ),
                               ],
-                            ),
+                            );
+                          },
+                        );
+                      },
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${clinicOwnerRegistration[index]['clinic']}',
+                                style: bodyRegularPoppins,
+                              ),
+                              Text(
+                                '${clinicOwnerRegistration[index]['location']}',
+                                style: smallSemiboldPoppins,
+                              ),
+                              Text(
+                                'Owned by: ${clinicOwnerRegistration[index]['firstName']} ${clinicOwnerRegistration[index]['lastName']}',
+                                style: smallRegularPoppins,
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    }),
-              ),
-            ],
-          ),
+                      ),
+                    );
+                  }),
+            ),
+          ],
         ),
       ),
     );
