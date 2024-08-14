@@ -1,37 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/common/widgets/main_wrapper.dart';
+import 'package:get/get.dart';
 
 class ViewPetScreen extends StatelessWidget {
-  const ViewPetScreen({super.key});
+  ViewPetScreen({super.key});
+
+  // final pets = RxList<Map<String, String>>([]);
+  final RxList<Map<String, String>> pets = [
+    {'name': 'Grey', 'petType': 'Dog', 'age': '6 years'},
+    {'name': 'Greya', 'petType': 'Dog', 'age': '6 months'},
+    {'name': 'Ally', 'petType': 'Dog', 'age': '1 year'},
+    {'name': 'Peewee', 'petType': 'Cat', 'age': '3 months'}
+  ].obs;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold (
-        appBar: AppBar (
-          title: Text('Users Pets', 
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 13,
-              fontWeight: FontWeight.bold
-            ),
-           ),
-        ),
-
-        body: ListView.builder(
-          itemCount: 5, // db  query sum
-          itemBuilder: (context, index){
-            return Card(
-              child: ListTile(
-                onTap: () {},
-                title: Text('Grey'), // db query select petname
-                leading: CircleAvatar(
-                  backgroundColor: Colors.blue[400],
+    return MainWrapper(
+      content: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(color: Colors.lightBlue),
+              child: Text(
+                'User\'s pets',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            );
-          }
-          ),
+            ),
+            const SizedBox(
+              height: 15.0,
+            ),
+            Expanded(
+              child: Obx(() => ListView.builder(
+                  itemCount: pets.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      child: ListTile(
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                      content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        pets[index]['name']!,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Age: ${pets[index]['age']}',
+                                        style: TextStyle(height: 3),
+                                      ),
+                                      Text(
+                                        'Pet Type: ${pets[index]['petType']}',
+                                        style: TextStyle(height: 3),
+                                      )
+                                    ],
+                                  )));
+                        },
+                        title: Text(pets[index]['name']!),
+                        leading: CircleAvatar(
+                          backgroundColor: pets[index]['petType'] == 'Dog'
+                              ? Colors.blueGrey
+                              : Colors.greenAccent,
+                        ),
+                      ),
+                    );
+                  })),
+            )
+          ],
         ),
-      );
+      ),
+      fab: FloatingActionButton(
+        shape: const CircleBorder(),
+        backgroundColor: Color.fromARGB(255, 255, 189, 89), 
+        onPressed: () {
+          Get.toNamed('/add_pet');
+        },
+        tooltip: 'Add Pet',
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }
