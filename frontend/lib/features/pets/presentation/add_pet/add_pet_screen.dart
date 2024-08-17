@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
 import 'package:get/get.dart';
 
+
 class AddPetScreen extends StatelessWidget {
    AddPetScreen({super.key});
 
+
   final RxString species = 'Dog'.obs;
+  final RxString gender = 'Male'.obs;
+  final DateTime birthday = DateTime.now();
+ final TextEditingController _date = TextEditingController();
+
+ 
 
 //   final RxList <String> dogBreeds = [
 //     'Aspin',
@@ -96,60 +103,138 @@ class AddPetScreen extends StatelessWidget {
                   ],),
                 ),
           ],),
+
+          // Row(
+          //     children: [
+          //       Padding(
+          //         padding: const EdgeInsets.all(10.0),
+          //         child: Row(
+                    
+          //           children: [
+          //            Obx (
+          //            () => Radio(
+          //             value: 'Male',
+          //             groupValue: gender.value,
+          //             onChanged: (value){
+          //               gender.value = value!;
+          //             },
+          //             ),
+          //            ),
+          //             SizedBox(width: 10,),
+          //             Text('Male'),
+                     
+          //           ],
+          //         ),
+          //       ),
+          //       Padding(
+          //         padding: const EdgeInsets.all(10.0),
+          //         child: Row(
+          //           children: [
+          //            Obx (
+          //            () =>Radio(
+          //             value: 'Female',
+          //             groupValue: gender.value,
+          //             onChanged: (value){
+          //               gender.value = value!;
+          //             },
+          //           ),
+          //            ),
+          //           SizedBox(width: 10,),
+          //           Text('Female'),
+          //         ],),
+          //       ),
+          // ],),
            
-
-            Container(
-              decoration: BoxDecoration(color: Colors.grey[300]),
-              child: TextField(decoration: InputDecoration(
+           
+           Row(children: [
+            Flexible(child: TextField(decoration: InputDecoration(
                 hintText: 'Pet\'s Name',
-                border: OutlineInputBorder()
+                border: OutlineInputBorder()   
               ),
-              ),
-            ),
-            Container(
-              height: 15
-            ),  
-            Container(
-              decoration: BoxDecoration(color: Colors.grey[300]),
-              child: TextField(decoration: InputDecoration(
-                hintText: 'Pet\'s Age',
-                border: OutlineInputBorder()
-              ),
-              ),
-            ),
-            Container(
-              height: 15
+            ),),
+            const SizedBox(
+              width: 15.0,
             ),
 
+           Flexible(child: TextField(decoration: InputDecoration(
+                hintText: 'Gender',
+                border: OutlineInputBorder()   
+              ),
+            ),)
 
-             Container(
-               decoration: BoxDecoration(color: Colors.grey[300]),
-              child: TextField(decoration: InputDecoration(
+           ],),
+           const SizedBox(
+            height: 15.0,
+           ),
+
+           Row(children: [
+            Flexible(
+              child:  TextField(decoration: InputDecoration(
                 hintText: 'Breed',
                 border: OutlineInputBorder()
               ),
               ),
+
             ),
+            const SizedBox(
+              width: 15.0,
+            ),
+            Flexible(
+              child: TextField(
+                controller: _date,
+                decoration: InputDecoration(
+                  labelText: 'Birthdate'
+                ),
+                onTap: ()async{
+                  DateTime? pickeddate = await showDatePicker(
+                    context: context, 
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now()
+                    );
+
+                    // if (pickeddate != null){
+                    //   setState((){
+                    //     _date.text =DateFormat('yyyy-MM-dd').format(pickeddate);
+                    //   })
+                    // }
+                },
+              ),
+            ),
+           
+           ],),
+          
+            
+            Container(
+              height: 15
+            ),
+
+
+             
             Container(
               height: 15
             ),  
 
             Container(
+              child: ElevatedButton(
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                child: Text('Add Pet'),
+                onPressed: () {
 
-            )
-           
+                  Get.back();
+                },
+                
+                ),
+
+            ),
+          
           ]
       ),
       ),
 
         
 
-      fab: FloatingActionButton(
-          shape: CircleBorder(),
-           backgroundColor: const Color.fromARGB(255, 255, 189, 89), 
-          onPressed: () {
-            Get.back();
-          }),
+      
     );
   }
 }
