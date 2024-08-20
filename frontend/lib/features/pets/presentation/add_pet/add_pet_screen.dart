@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+
+
+
 
 
 class AddPetScreen extends StatelessWidget {
@@ -9,10 +13,9 @@ class AddPetScreen extends StatelessWidget {
 
   final RxString species = 'Dog'.obs;
   final RxString gender = 'Male'.obs;
-  final DateTime birthday = DateTime.now();
- final TextEditingController _date = TextEditingController();
-
- 
+  final defaultDate = DateTime.now();
+  final TextEditingController _dateController = TextEditingController();
+   final RxString _selectedDate = ''.obs;
 
 //   final RxList <String> dogBreeds = [
 //     'Aspin',
@@ -180,10 +183,13 @@ class AddPetScreen extends StatelessWidget {
               width: 15.0,
             ),
             Flexible(
-              child: TextField(
-                controller: _date,
+              child: Obx(() {
+              // Update the text field with the value of _selectedDate
+              _dateController.text = _selectedDate.value;
+              return TextField(
+                controller: _dateController,
                 decoration: InputDecoration(
-                  labelText: 'Birthdate'
+                  labelText: 'Birthdate',
                 ),
                 onTap: ()async{
                   DateTime? pickeddate = await showDatePicker(
@@ -193,12 +199,14 @@ class AddPetScreen extends StatelessWidget {
                     lastDate: DateTime.now()
                     );
 
-                    // if (pickeddate != null){
-                    //   setState((){
-                    //     _date.text =DateFormat('yyyy-MM-dd').format(pickeddate);
-                    //   })
-                    // }
-                },
+                    if (pickeddate != null){
+                        _selectedDate.value = DateFormat('yyyy-MM-dd').format(pickeddate);
+                      
+                    }
+                }
+                );
+              
+              }
               ),
             ),
            
