@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
+  intl: ^0.17.0  # Add this line for the intl package
 
   cupertino_icons: ^1.0.2
   get: ^4.6.6
