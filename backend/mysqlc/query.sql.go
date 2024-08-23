@@ -145,6 +145,37 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	return i, err
 }
 
+const getUserByID = `-- name: GetUserByID :one
+SELECT users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS user_role
+FROM users JOIN roles ON roles.id = users.role_id
+WHERE users.id = ?
+`
+
+type GetUserByIDRow struct {
+	ID         uint32
+	GivenName  string
+	FamilyName string
+	Email      string
+	Password   string
+	RoleID     uint8
+	UserRole   string
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, id uint32) (GetUserByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	var i GetUserByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.GivenName,
+		&i.FamilyName,
+		&i.Email,
+		&i.Password,
+		&i.RoleID,
+		&i.UserRole,
+	)
+	return i, err
+}
+
 const listClinics = `-- name: ListClinics :many
 SELECT clinics.id, clinics.user_id, clinics.name, clinics.location, clinics.business_no, clinics.is_verified, users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS user_role
 FROM clinics

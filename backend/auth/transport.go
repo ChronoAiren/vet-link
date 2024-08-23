@@ -15,15 +15,24 @@ func (s *Service) AddRoutes() {
 		} else {
 			var usersDTO []UserDTO
 			for _, user := range users {
-				usersDTO = append(usersDTO, UserDTO{
-					user.ID,
-					user.GivenName,
-					user.FamilyName,
-					user.Email,
-					&user.UserRole,
-				})
+				usersDTO = append(usersDTO, *toUserDTO(user))
 			}
 			return c.JSONPretty(http.StatusOK, usersDTO, "  ")
+		}
+	})
+	s.serve.GET("/user/:id", func(c echo.Context) error {
+		ctx := c.Request().Context()
+		type getUserRequest struct {
+			ID uint32 `param:"id"`
+		}
+		req := new(getUserRequest)
+		if err := c.Bind(req); err != nil {
+			return err
+		}
+		if user, err := s.store.GetUserByID(ctx, req.ID); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		} else {
+			return c.JSONPretty(http.StatusOK, toUserDTO(user), "   ")
 		}
 	})
 	s.serve.GET("/clinics", func(c echo.Context) error {
@@ -33,25 +42,25 @@ func (s *Service) AddRoutes() {
 		} else {
 			var clinicsDTO []ClinicDTO
 			for _, clinic := range clinics {
-				clinicsDTO = append(clinicsDTO, ClinicDTO{
-					clinic.ID,
-					clinic.Name,
-					clinic.Location,
-					clinic.BusinessNo,
-					UserDTO{
-						clinic.User.ID,
-						clinic.User.GivenName,
-						clinic.User.FamilyName,
-						clinic.User.Email,
-						nil,
-					},
-				})
+				clinicsDTO = append(clinicsDTO, *toClinicDTO(clinic))
 			}
 			return c.JSONPretty(http.StatusOK, clinicsDTO, "  ")
 		}
 	})
 	s.serve.GET("/clinic/:id", func(c echo.Context) error {
-		return c.String(http.StatusOK, "TODO")
+		ctx := c.Request().Context()
+		type getClinicRequest struct {
+			ID uint32 `param:"id"`
+		}
+		req := new(getClinicRequest)
+		if err := c.Bind(req); err != nil {
+			return err
+		}
+		if clinic, err := s.store.GetClinic(ctx, req.ID); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		} else {
+			return c.JSONPretty(http.StatusOK, toClinicDTO(clinic), "   ")
+		}
 	})
 	s.serve.POST("/login", func(c echo.Context) error {
 		req := new(LoginRequest)

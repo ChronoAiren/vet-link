@@ -12,13 +12,7 @@ func (s *Service) login(ctx context.Context, r LoginRequest) (int, *UserDTO) {
 	} else if user.Password != r.Password {
 		return http.StatusUnauthorized, nil
 	} else {
-		return http.StatusOK, &UserDTO{
-			user.ID,
-			user.GivenName,
-			user.FamilyName,
-			user.Email,
-			&user.UserRole,
-		}
+		return http.StatusOK, toUserDTO(user)
 	}
 }
 
@@ -67,19 +61,7 @@ func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (
 	} else if clinic, err := s.store.GetClinic(ctx, uint32(id)); err != nil {
 		return http.StatusBadRequest, nil
 	} else {
-		return http.StatusOK, &ClinicDTO{
-			clinic.ID,
-			clinic.Name,
-			clinic.Location,
-			clinic.BusinessNo,
-			UserDTO{
-				clinic.User.ID,
-				clinic.User.GivenName,
-				clinic.User.FamilyName,
-				clinic.User.Email,
-				&clinic.UserRole,
-			},
-		}
+		return http.StatusOK, toClinicDTO(clinic)
 	}
 }
 

@@ -5,6 +5,11 @@ SELECT users.*, roles.description AS user_role
 FROM users JOIN roles ON roles.id = users.role_id
 WHERE email = ?;
 
+-- name: GetUserByID :one
+SELECT users.*, roles.description AS user_role
+FROM users JOIN roles ON roles.id = users.role_id
+WHERE users.id = ?;
+
 -- name: CreateUser :execresult
 INSERT INTO users (given_name, family_name, email, password, role_id)
 VALUES (?, ?, ?, ?, ?);
