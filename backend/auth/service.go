@@ -38,5 +38,13 @@ type UserDTO struct {
 	GivenName  string
 	FamilyName string
 	Email      string
-	Role       string
+	Role       *string `json:"Role,omitempty"`
+}
+
+type ClinicDTO struct {
+	ID         uint32
+	Name       string
+	Location   string
+	BusinessNo string
+	User       UserDTO `json:"Owner"`
 }

@@ -55,8 +55,10 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 }
 
 const getClinic = `-- name: GetClinic :one
-SELECT clinics.id, clinics.user_id, clinics.name, clinics.location, clinics.business_no, users.id, users.given_name, users.family_name, users.email, users.password, users.role_id
-FROM clinics JOIN users ON users.id = user_id
+SELECT clinics.id, clinics.user_id, clinics.name, clinics.location, clinics.business_no, clinics.is_verified, users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS user_role
+FROM clinics
+    JOIN users ON users.id = user_id
+    JOIN roles ON roles.id = users.role_id
 WHERE user_id = ?
 `
 
@@ -66,7 +68,9 @@ type GetClinicRow struct {
 	Name       string
 	Location   string
 	BusinessNo string
+	IsVerified uint8
 	User       User
+	UserRole   string
 }
 
 func (q *Queries) GetClinic(ctx context.Context, userID uint32) (GetClinicRow, error) {
@@ -78,18 +82,20 @@ func (q *Queries) GetClinic(ctx context.Context, userID uint32) (GetClinicRow, e
 		&i.Name,
 		&i.Location,
 		&i.BusinessNo,
+		&i.IsVerified,
 		&i.User.ID,
 		&i.User.GivenName,
 		&i.User.FamilyName,
 		&i.User.Email,
 		&i.User.Password,
 		&i.User.RoleID,
+		&i.UserRole,
 	)
 	return i, err
 }
 
 const getClinicByBusinessNo = `-- name: GetClinicByBusinessNo :one
-SELECT id, user_id, name, location, business_no FROM clinics WHERE business_no = ?
+SELECT id, user_id, name, location, business_no, is_verified FROM clinics WHERE business_no = ?
 `
 
 func (q *Queries) GetClinicByBusinessNo(ctx context.Context, businessNo string) (Clinic, error) {
@@ -101,13 +107,14 @@ func (q *Queries) GetClinicByBusinessNo(ctx context.Context, businessNo string) 
 		&i.Name,
 		&i.Location,
 		&i.BusinessNo,
+		&i.IsVerified,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 
-SELECT users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS role
+SELECT users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS user_role
 FROM users JOIN roles ON roles.id = users.role_id
 WHERE email = ?
 `
@@ -119,7 +126,7 @@ type GetUserByEmailRow struct {
 	Email      string
 	Password   string
 	RoleID     uint8
-	Role       string
+	UserRole   string
 }
 
 // noinspection SqlResolveForFile
@@ -133,14 +140,16 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.Email,
 		&i.Password,
 		&i.RoleID,
-		&i.Role,
+		&i.UserRole,
 	)
 	return i, err
 }
 
 const listClinics = `-- name: ListClinics :many
-SELECT clinics.id, clinics.user_id, clinics.name, clinics.location, clinics.business_no, users.id, users.given_name, users.family_name, users.email, users.password, users.role_id
-FROM clinics JOIN users ON users.id = user_id
+SELECT clinics.id, clinics.user_id, clinics.name, clinics.location, clinics.business_no, clinics.is_verified, users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS user_role
+FROM clinics
+    JOIN users ON users.id = user_id
+    JOIN roles ON roles.id = users.role_id
 `
 
 type ListClinicsRow struct {
@@ -149,7 +158,9 @@ type ListClinicsRow struct {
 	Name       string
 	Location   string
 	BusinessNo string
+	IsVerified uint8
 	User       User
+	UserRole   string
 }
 
 func (q *Queries) ListClinics(ctx context.Context) ([]ListClinicsRow, error) {
@@ -167,12 +178,14 @@ func (q *Queries) ListClinics(ctx context.Context) ([]ListClinicsRow, error) {
 			&i.Name,
 			&i.Location,
 			&i.BusinessNo,
+			&i.IsVerified,
 			&i.User.ID,
 			&i.User.GivenName,
 			&i.User.FamilyName,
 			&i.User.Email,
 			&i.User.Password,
 			&i.User.RoleID,
+			&i.UserRole,
 		); err != nil {
 			return nil, err
 		}
@@ -188,7 +201,7 @@ func (q *Queries) ListClinics(ctx context.Context) ([]ListClinicsRow, error) {
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS role
+SELECT users.id, users.given_name, users.family_name, users.email, users.password, users.role_id, roles.description AS user_role
 FROM users JOIN roles ON roles.id = users.role_id
 `
 
@@ -199,7 +212,7 @@ type ListUsersRow struct {
 	Email      string
 	Password   string
 	RoleID     uint8
-	Role       string
+	UserRole   string
 }
 
 func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
@@ -218,7 +231,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 			&i.Email,
 			&i.Password,
 			&i.RoleID,
-			&i.Role,
+			&i.UserRole,
 		); err != nil {
 			return nil, err
 		}

@@ -4,7 +4,7 @@ CREATE TABLE `users` (
     `family_name` varchar(45) NOT NULL,
     `email` varchar(45) NOT NULL,
     `password` varchar(45) NOT NULL,
-    `role_id` tinyint unsigned NOT NULL DEFAULT '1',
+    `role_id` tinyint unsigned NOT NULL DEFAULT '2',
     PRIMARY KEY (`id`)
 );
 
@@ -14,6 +14,7 @@ CREATE TABLE `clinics` (
     `name` varchar(45) NOT NULL,
     `location` varchar(45) NOT NULL,
     `business_no` varchar(45) NOT NULL,
+    `is_verified` tinyint unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`)
 );
 

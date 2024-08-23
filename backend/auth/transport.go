@@ -20,7 +20,7 @@ func (s *Service) AddRoutes() {
 					user.GivenName,
 					user.FamilyName,
 					user.Email,
-					user.Role,
+					&user.UserRole,
 				})
 			}
 			return c.JSONPretty(http.StatusOK, usersDTO, "  ")
@@ -31,7 +31,23 @@ func (s *Service) AddRoutes() {
 		if clinics, err := s.store.ListClinics(ctx); err != nil {
 			return err
 		} else {
-			return c.JSONPretty(http.StatusOK, clinics, "  ")
+			var clinicsDTO []ClinicDTO
+			for _, clinic := range clinics {
+				clinicsDTO = append(clinicsDTO, ClinicDTO{
+					clinic.ID,
+					clinic.Name,
+					clinic.Location,
+					clinic.BusinessNo,
+					UserDTO{
+						clinic.User.ID,
+						clinic.User.GivenName,
+						clinic.User.FamilyName,
+						clinic.User.Email,
+						nil,
+					},
+				})
+			}
+			return c.JSONPretty(http.StatusOK, clinicsDTO, "  ")
 		}
 	})
 	s.serve.POST("/login", func(c echo.Context) error {
@@ -86,7 +102,7 @@ func (s *Service) handleRegister(c echo.Context, ctx context.Context, req *Regis
 
 func (s *Service) handleRegisterClinic(c echo.Context, ctx context.Context, req *RegisterClinicRequest) error {
 	genericError := errors.New("bad request")
-	if _, user := s.register(ctx, req.User); user == nil {
+	if _, user := s.registerClinic(ctx, *req); user == nil {
 		return genericError
 	} else {
 		req.UserID = user.ID

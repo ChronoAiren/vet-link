@@ -17,7 +17,7 @@ func (s *Service) login(ctx context.Context, r LoginRequest) (int, *UserDTO) {
 			user.GivenName,
 			user.FamilyName,
 			user.Email,
-			user.Role,
+			&user.UserRole,
 		}
 	}
 }
@@ -34,23 +34,50 @@ func (s *Service) register(ctx context.Context, r RegisterRequest) (int, *UserDT
 	return s.login(ctx, r.Credentials)
 }
 
-func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (int, *mysqlc.ClinicRow) {
-	code, user := s.register(ctx, r.User)
-	if code != http.StatusOK || user == nil {
+type Role uint8
+
+const (
+	RoleAdmin uint8 = 1 + iota
+	RoleDefault
+	RoleClinicOwner
+)
+
+func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (int, *ClinicDTO) {
+	if _, err := s.store.CreateUser(ctx, mysqlc.CreateUserParams{
+		GivenName:  r.User.GivenName,
+		FamilyName: r.User.FamilyName,
+		Email:      r.User.Credentials.Email,
+		Password:   r.User.Credentials.Password,
+		RoleID:     RoleClinicOwner,
+	}); err != nil {
+		return http.StatusBadRequest, nil
+	} else if _, user := s.login(ctx, r.User.Credentials); user == nil {
 		return http.StatusBadRequest, nil
 	}
 	if result, err := s.store.CreateClinic(ctx, mysqlc.CreateClinicParams{
-		UserID:     user.ID,
+		UserID:     r.UserID,
 		Name:       r.Name,
 		Location:   r.Location,
 		BusinessNo: r.BusinessNo,
 	}); err != nil {
 		return http.StatusBadRequest, nil
-	} else if clinicID, err := result.LastInsertId(); err != nil {
+	} else if id, err := result.LastInsertId(); err != nil {
 		return http.StatusBadRequest, nil
-	} else if clinic, err := s.store.Clinic(ctx, uint32(clinicID)); err != nil {
+	} else if clinic, err := s.store.GetClinic(ctx, uint32(id)); err != nil {
 		return http.StatusBadRequest, nil
 	} else {
-		return http.StatusOK, &clinic
+		return http.StatusOK, &ClinicDTO{
+			clinic.ID,
+			clinic.Name,
+			clinic.Location,
+			clinic.BusinessNo,
+			UserDTO{
+				clinic.User.ID,
+				clinic.User.GivenName,
+				clinic.User.FamilyName,
+				clinic.User.Email,
+				&clinic.UserRole,
+			},
+		}
 	}
 }
