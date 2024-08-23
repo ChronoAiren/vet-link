@@ -4,6 +4,6 @@ import 'package:get/get.dart';
 class AllControllerBinding implements Bindings {
   @override
   void dependencies() {
-    Get.put<CustomDrawerController>(CustomDrawerController());
+    Get.put<CustomDrawerController>(CustomDrawerController(), permanent: true);
   }
 }

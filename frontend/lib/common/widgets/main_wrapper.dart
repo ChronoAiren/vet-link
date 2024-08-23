@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/common/controllers/drawer_controller.dart';
+import 'package:frontend/common/controllers/route_controller.dart';
 import 'package:frontend/common/widgets/custom_app_bar.dart';
 import 'package:frontend/common/widgets/custom_drawer.dart';
 import 'package:frontend/styles/dark_theme.dart';
@@ -17,8 +18,8 @@ class MainWrapper extends StatelessWidget {
 
   final Widget content;
   final FloatingActionButton? fab;
-
   final drawerController = gx.Get.find<CustomDrawerController>();
+  final routeController = gx.Get.put(RouteController());
 
   @override
   Widget build(BuildContext context) {
