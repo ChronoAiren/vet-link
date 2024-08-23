@@ -107,7 +107,9 @@ class CustomDrawer extends StatelessWidget {
                         : lightOnSurfaceColor,
                   ),
                 ),
-                onTap: () {},
+                onTap: () {
+                  controller.logout();
+                },
               ),
             ],
           ),
