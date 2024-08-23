@@ -14,4 +14,6 @@ class SessionController extends GetxController {
     currentUser = null;
     currentClinic = null;
   }
+
+  void resetCurrentUser() => currentUser == null;
 }
