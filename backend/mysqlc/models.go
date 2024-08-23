@@ -4,12 +4,24 @@
 
 package mysqlc
 
+import (
+	"time"
+)
+
 type Clinic struct {
 	ID         uint32
 	UserID     uint32
 	Name       string
 	Location   string
 	BusinessNo string
+}
+
+type Pet struct {
+	ID        uint32
+	Name      string
+	Gender    string
+	Birthdate time.Time
+	OwnerID   uint32
 }
 
 type Role struct {

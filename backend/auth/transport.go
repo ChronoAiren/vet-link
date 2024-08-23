@@ -20,7 +20,7 @@ func (s *Service) AddRoutes() {
 			return c.JSONPretty(http.StatusOK, usersDTO, "  ")
 		}
 	})
-	s.serve.GET("/user/:id", func(c echo.Context) error {
+	s.serve.GET("/users/:id", func(c echo.Context) error {
 		ctx := c.Request().Context()
 		type getUserRequest struct {
 			ID uint32 `param:"id"`
@@ -47,7 +47,7 @@ func (s *Service) AddRoutes() {
 			return c.JSONPretty(http.StatusOK, clinicsDTO, "  ")
 		}
 	})
-	s.serve.GET("/clinic/:id", func(c echo.Context) error {
+	s.serve.GET("/clinics/:id", func(c echo.Context) error {
 		ctx := c.Request().Context()
 		type getClinicRequest struct {
 			ID uint32 `param:"id"`
@@ -78,7 +78,7 @@ func (s *Service) AddRoutes() {
 		ctx := c.Request().Context()
 		return s.handleRegister(c, ctx, req)
 	})
-	s.serve.POST("/register/clinic", func(c echo.Context) error {
+	s.serve.POST("/clinics/register", func(c echo.Context) error {
 		req := new(RegisterClinicRequest)
 		if err := c.Bind(req); err != nil {
 			return err
@@ -86,7 +86,7 @@ func (s *Service) AddRoutes() {
 		ctx := c.Request().Context()
 		return s.handleRegisterClinic(c, ctx, req)
 	})
-	s.serve.POST("/verify/clinic", func(c echo.Context) error {
+	s.serve.POST("/clinics/verify", func(c echo.Context) error {
 		req := new(VerifyClinicRequest)
 		if err := c.Bind(req); err != nil {
 			return err
