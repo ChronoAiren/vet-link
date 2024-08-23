@@ -10,7 +10,6 @@ type Clinic struct {
 	Name       string
 	Location   string
 	BusinessNo string
-	IsVerified uint8
 }
 
 type Role struct {

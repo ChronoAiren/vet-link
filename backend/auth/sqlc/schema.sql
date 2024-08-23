@@ -14,7 +14,6 @@ CREATE TABLE `clinics` (
     `name` varchar(45) NOT NULL,
     `location` varchar(45) NOT NULL,
     `business_no` varchar(45) NOT NULL,
-    `is_verified` tinyint unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`)
 );
 
