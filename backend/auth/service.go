@@ -15,13 +15,40 @@ func New(store *mysqlc.Queries, serve *echo.Echo) *Service {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string
+	Password string
 }
 
-type RegisterPetOwnerRequest struct {
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	GivenName  string `json:"first_name"`
-	FamilyName string `json:"last_name"`
+type RegisterRequest struct {
+	Credentials LoginRequest
+	GivenName   string
+	FamilyName  string
+}
+
+type RegisterClinicRequest struct {
+	User       RegisterRequest
+	UserID     uint32
+	Name       string
+	Location   string
+	BusinessNo string
+}
+
+type VerifyClinicRequest struct {
+	UserID uint32
+}
+
+type UserDTO struct {
+	ID         uint32
+	GivenName  string
+	FamilyName string
+	Email      string
+	Role       *string `json:"Role,omitempty"`
+}
+
+type ClinicDTO struct {
+	ID         uint32
+	Name       string
+	Location   string
+	BusinessNo string
+	User       UserDTO `json:"Owner"`
 }

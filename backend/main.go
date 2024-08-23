@@ -2,19 +2,28 @@ package main
 
 import (
 	"backend/auth"
-	"fmt"
+	"backend/pets"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func run() (err error) {
+func run() error {
 	backend := echo.New()
+	backend.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	authSvc := auth.New(database, backend)
-	authSvc.RegisterRoutes()
+	authSvc.AddRoutes()
 
-	address := fmt.Sprintf(":%s", env["BE_PORT"])
-	if err = backend.Start(address); err != nil {
+	petsSvc := pets.New(database, backend)
+	petsSvc.AddRoutes()
+
+	address := ":" + env["BE_PORT"]
+	if err := backend.Start(address); err != nil {
 		return err
 	}
 	return nil
