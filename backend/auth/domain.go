@@ -40,6 +40,7 @@ const (
 	RoleAdmin uint8 = 1 + iota
 	RoleDefault
 	RoleClinicOwner
+	RoleUnverifiedClinicOwner
 )
 
 func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (int, *ClinicDTO) {
@@ -48,7 +49,7 @@ func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (
 		FamilyName: r.User.FamilyName,
 		Email:      r.User.Credentials.Email,
 		Password:   r.User.Credentials.Password,
-		RoleID:     RoleClinicOwner,
+		RoleID:     RoleUnverifiedClinicOwner,
 	}); err != nil {
 		return http.StatusBadRequest, nil
 	} else if _, user := s.login(ctx, r.User.Credentials); user == nil {
@@ -80,4 +81,12 @@ func (s *Service) registerClinic(ctx context.Context, r RegisterClinicRequest) (
 			},
 		}
 	}
+}
+
+func (s *Service) verifyClinic(ctx context.Context, userID uint32) (int, *ClinicDTO) {
+	clinic := mysqlc.UpdateUserVerifiedParams{ID: userID, RoleID: RoleClinicOwner}
+	if err := s.store.UpdateUserVerified(ctx, clinic); err != nil {
+		return http.StatusBadRequest, nil
+	}
+	return http.StatusOK, nil
 }

@@ -50,6 +50,9 @@ func (s *Service) AddRoutes() {
 			return c.JSONPretty(http.StatusOK, clinicsDTO, "  ")
 		}
 	})
+	s.serve.GET("/clinic/:id", func(c echo.Context) error {
+		return c.String(http.StatusOK, "TODO")
+	})
 	s.serve.POST("/login", func(c echo.Context) error {
 		req := new(LoginRequest)
 		if err := c.Bind(req); err != nil {
@@ -73,6 +76,14 @@ func (s *Service) AddRoutes() {
 		}
 		ctx := c.Request().Context()
 		return s.handleRegisterClinic(c, ctx, req)
+	})
+	s.serve.POST("/verify/clinic", func(c echo.Context) error {
+		req := new(VerifyClinicRequest)
+		if err := c.Bind(req); err != nil {
+			return err
+		}
+		ctx := c.Request().Context()
+		return s.handleVerifyClinic(c, ctx, req)
 	})
 }
 
@@ -117,4 +128,9 @@ func (s *Service) handleRegisterClinic(c echo.Context, ctx context.Context, req 
 			return c.String(http.StatusBadGateway, "Having connection issues")
 		}
 	}
+}
+
+func (s *Service) handleVerifyClinic(c echo.Context, ctx context.Context, req *VerifyClinicRequest) error {
+	code, _ := s.verifyClinic(ctx, req.UserID)
+	return c.JSON(code, nil)
 }

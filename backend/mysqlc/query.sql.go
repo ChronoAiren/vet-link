@@ -245,3 +245,17 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 	}
 	return items, nil
 }
+
+const updateUserVerified = `-- name: UpdateUserVerified :exec
+UPDATE users SET role_id = ? WHERE id = ?
+`
+
+type UpdateUserVerifiedParams struct {
+	RoleID uint8
+	ID     uint32
+}
+
+func (q *Queries) UpdateUserVerified(ctx context.Context, arg UpdateUserVerifiedParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserVerified, arg.RoleID, arg.ID)
+	return err
+}

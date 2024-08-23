@@ -33,6 +33,10 @@ type RegisterClinicRequest struct {
 	BusinessNo string
 }
 
+type VerifyClinicRequest struct {
+	UserID uint32
+}
+
 type UserDTO struct {
 	ID         uint32
 	GivenName  string

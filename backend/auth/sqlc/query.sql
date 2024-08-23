@@ -32,3 +32,6 @@ WHERE user_id = ?;
 
 -- name: GetClinicByBusinessNo :one
 SELECT * FROM clinics WHERE business_no = ?;
+
+-- name: UpdateUserVerified :exec
+UPDATE users SET role_id = ? WHERE id = ?;
