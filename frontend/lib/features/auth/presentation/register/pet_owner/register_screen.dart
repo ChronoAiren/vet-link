@@ -3,12 +3,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/common/widgets/custom_accent_button.dart';
 import 'package:frontend/common/widgets/custom_primary_button.dart';
 import 'package:frontend/features/auth/presentation/register/clinic_owner/widgets/register_form.dart';
+import 'package:frontend/features/auth/presentation/register/pet_owner/register_controller.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
+import 'package:get/get.dart';
 
 class RegisterPetOwnerScreen extends StatelessWidget {
-  const RegisterPetOwnerScreen({super.key});
+  RegisterPetOwnerScreen({super.key});
+
+  final registerController = Get.put(RegisterController());
 
   @override
   Widget build(BuildContext context) {
@@ -78,13 +82,21 @@ class RegisterPetOwnerScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            RegisterForm(),
+                            RegisterForm(
+                              formKey: registerController.formKey,
+                              firstName: registerController.firstName,
+                              lastName: registerController.lastName,
+                              emailField: registerController.emailField,
+                              passwordField: registerController.passwordField,
+                            ),
                             const SizedBox(
                               height: 22.0,
                             ),
                             CustomAccentButton(
                               buttonLabel: 'Register',
-                              onPressed: () {},
+                              onPressed: () {
+                                registerController.register();
+                              },
                             ),
                             const SizedBox(
                               height: 10.0,

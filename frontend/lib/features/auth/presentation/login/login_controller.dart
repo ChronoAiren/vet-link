@@ -22,9 +22,10 @@ class LoginController extends GetxController {
   Future<void> signIn() async {
     if (formKey.currentState!.validate()) {
       Get.defaultDialog(
-          title: 'Loading...',
-          content: const CircularProgressIndicator(),
-          barrierDismissible: false);
+        title: 'Loading...',
+        content: const CircularProgressIndicator(),
+        barrierDismissible: false,
+      );
 
       // Wait for 3 seconds before proceeding
       await Future.delayed(const Duration(seconds: 1));
@@ -33,8 +34,8 @@ class LoginController extends GetxController {
         final response = await dioClient.post(
           'login',
           data: {
-            "email": emailField.text,
-            "password": passwordField.text,
+            "Email": emailField.text,
+            "Password": passwordField.text,
           },
         );
 
