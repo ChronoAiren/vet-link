@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/common/widgets/custom_accent_button.dart';
 import 'package:frontend/common/widgets/cutom_text_field.dart';
+import 'package:frontend/features/user/presentation/add_staff/add_staff_controller.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
+import 'package:frontend/utils/validator.dart';
 import 'package:get/get.dart';
 
 class AddStaffScreen extends StatelessWidget {
   AddStaffScreen({super.key});
 
-  final RxString userRole = 'Veterinarian'.obs;
+  final controller = Get.put(AddStaffController());
 
   @override
   Widget build(BuildContext context) {
@@ -115,26 +117,31 @@ class AddStaffScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Form(
+                        key: controller.formKey,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Row(
+                            Row(
                               children: [
                                 Flexible(
                                   child: CustomTextField(
                                     labelText: 'First Name',
+                                    prefixIcon: const Icon(Icons.person),
                                     floatLabel: true,
-                                    prefixIcon: Icon(Icons.person),
+                                    validator: Validator().notEmpty,
+                                    controller: controller.firstNameField,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 15.0,
                                 ),
                                 Flexible(
                                   child: CustomTextField(
                                     labelText: 'Last Name',
-                                    prefixIcon: Icon(Icons.person),
+                                    prefixIcon: const Icon(Icons.person),
                                     floatLabel: true,
+                                    validator: Validator().notEmpty,
+                                    controller: controller.lastNameField,
                                   ),
                                 ),
                               ],
@@ -142,10 +149,12 @@ class AddStaffScreen extends StatelessWidget {
                             const SizedBox(
                               height: 15.0,
                             ),
-                            const CustomTextField(
-                              prefixIcon: Icon(Icons.email_rounded),
+                            CustomTextField(
                               labelText: 'Email',
+                              prefixIcon: const Icon(Icons.person),
                               floatLabel: true,
+                              validator: Validator().email,
+                              controller: controller.lastNameField,
                             ),
                             const SizedBox(
                               height: 20.0,
@@ -160,9 +169,9 @@ class AddStaffScreen extends StatelessWidget {
                                       Obx(
                                         () => Radio(
                                           value: "Veterinarian",
-                                          groupValue: userRole.value,
+                                          groupValue: controller.userRole.value,
                                           onChanged: (value) {
-                                            userRole.value = value!;
+                                            controller.userRole.value = value!;
                                           },
                                         ),
                                       ),
@@ -197,9 +206,9 @@ class AddStaffScreen extends StatelessWidget {
                                       Obx(
                                         () => Radio(
                                           value: "Receptionist",
-                                          groupValue: userRole.value,
+                                          groupValue: controller.userRole.value,
                                           onChanged: (value) {
-                                            userRole.value = value!;
+                                            controller.userRole.value = value!;
                                           },
                                         ),
                                       ),
@@ -244,7 +253,9 @@ class AddStaffScreen extends StatelessWidget {
                                 width: 150.0,
                                 child: CustomAccentButton(
                                   buttonLabel: 'Add Staff',
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    controller.addStaff();
+                                  },
                                 ),
                               ),
                             ),
