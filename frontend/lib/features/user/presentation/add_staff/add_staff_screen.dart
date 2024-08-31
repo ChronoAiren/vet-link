@@ -6,6 +6,7 @@ import 'package:frontend/features/user/presentation/add_staff/add_staff_controll
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
+import 'package:frontend/utils/validator.dart';
 import 'package:get/get.dart';
 
 class AddStaffScreen extends StatelessWidget {
@@ -116,26 +117,31 @@ class AddStaffScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Form(
+                        key: controller.formKey,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Row(
+                            Row(
                               children: [
                                 Flexible(
                                   child: CustomTextField(
                                     labelText: 'First Name',
+                                    prefixIcon: const Icon(Icons.person),
                                     floatLabel: true,
-                                    prefixIcon: Icon(Icons.person),
+                                    validator: Validator().notEmpty,
+                                    controller: controller.firstNameField,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 15.0,
                                 ),
                                 Flexible(
                                   child: CustomTextField(
                                     labelText: 'Last Name',
-                                    prefixIcon: Icon(Icons.person),
+                                    prefixIcon: const Icon(Icons.person),
                                     floatLabel: true,
+                                    validator: Validator().notEmpty,
+                                    controller: controller.lastNameField,
                                   ),
                                 ),
                               ],
@@ -143,10 +149,12 @@ class AddStaffScreen extends StatelessWidget {
                             const SizedBox(
                               height: 15.0,
                             ),
-                            const CustomTextField(
-                              prefixIcon: Icon(Icons.email_rounded),
+                            CustomTextField(
                               labelText: 'Email',
+                              prefixIcon: const Icon(Icons.person),
                               floatLabel: true,
+                              validator: Validator().email,
+                              controller: controller.lastNameField,
                             ),
                             const SizedBox(
                               height: 20.0,
@@ -245,7 +253,9 @@ class AddStaffScreen extends StatelessWidget {
                                 width: 150.0,
                                 child: CustomAccentButton(
                                   buttonLabel: 'Add Staff',
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    controller.addStaff();
+                                  },
                                 ),
                               ),
                             ),

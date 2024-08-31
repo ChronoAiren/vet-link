@@ -10,12 +10,19 @@ class AddStaffController extends GetxController {
   final DioClient dioClient = DioClient();
   final formKey = GlobalKey<FormState>();
 
-  final firstName = TextEditingController();
-  final lastName = TextEditingController();
+  final firstNameField = TextEditingController();
+  final lastNameField = TextEditingController();
   final emailField = TextEditingController();
   final RxString userRole = 'Veterinarian'.obs;
 
-  Future<void> addStaff(int clinicId) async {
+  Future<void> addStaff() async {
+    int clinicId = sessionController.currentClinic?.id ?? -1;
+
+    if (clinicId == -1) {
+      //Cannot detect a clinic you are affiliated with.
+      return;
+    }
+
     if (formKey.currentState!.validate()) {
       Get.defaultDialog(
         title: 'Loading...',
@@ -28,20 +35,17 @@ class AddStaffController extends GetxController {
 
       try {
         final response = await dioClient.post(
-          'register',
+          'add-staff',
           data: {
             "Email": emailField.text,
-            "GivenName": firstName.text,
-            "FamilyName": lastName.text,
+            "GivenName": firstNameField.text,
+            "FamilyName": lastNameField.text,
             "userRole": userRole.value,
           },
         );
 
         final user = User.fromJson(response.data);
         sessionController.setCurrentUser(user);
-
-        Get.back(); //hide dialog
-        Get.offAndToNamed('/home');
       } on DioException catch (e) {
         Get.back(); //hide dialog
         Get.snackbar(
