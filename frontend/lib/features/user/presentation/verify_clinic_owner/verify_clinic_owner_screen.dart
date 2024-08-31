@@ -1,76 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
+import 'package:frontend/features/user/presentation/verify_clinic_owner/verify_clinic_owner_controller.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
+import 'package:get/get.dart';
 
 class VerifyClinicOwnerScreen extends StatelessWidget {
   VerifyClinicOwnerScreen({super.key});
 
-  final List<Map<String, String>> clinicOwnerRegistration = [
-    {
-      'firstName': 'Jake',
-      'lastName': 'Peralta',
-      'clinic': '99th Precinct Veterinary',
-      'location': 'Brooklyn',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Amy',
-      'lastName': 'Santiago',
-      'clinic': 'Santiago Pet Care',
-      'location': 'Queens',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Rosa',
-      'lastName': 'Diaz',
-      'clinic': 'Diaz Animal Clinic',
-      'location': 'Manhattan',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Terry',
-      'lastName': 'Jeffords',
-      'clinic': 'Jeffords Family Vet',
-      'location': 'Brooklyn',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Charles',
-      'lastName': 'Boyle',
-      'clinic': 'Boyle’s Best Buddies Vet',
-      'location': 'Brooklyn',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Holt',
-      'lastName': 'Raymond',
-      'clinic': 'Holt Veterinary Services',
-      'location': 'Brooklyn',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Gina',
-      'lastName': 'Linetti',
-      'clinic': 'Linetti Animal Care',
-      'location': 'Staten Island',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Kevin',
-      'lastName': 'Cozner',
-      'clinic': 'Cozner Companion Care',
-      'location': 'Manhattan',
-      'businessPermit': '123-3434-24543-3434'
-    },
-    {
-      'firstName': 'Adrian',
-      'lastName': 'Pimento',
-      'clinic': 'Pimento Vet Clinic',
-      'location': 'Queens',
-      'businessPermit': '123-3434-24543-3434'
-    },
-  ];
+  final controller = Get.put(VerifyClinicOwnerController());
 
   @override
   Widget build(BuildContext context) {
@@ -99,124 +37,138 @@ class VerifyClinicOwnerScreen extends StatelessWidget {
               height: 15.0,
             ),
             Expanded(
-              child: ListView.builder(
-                  padding: const EdgeInsets.only(
-                    bottom: 15.0,
-                  ),
-                  shrinkWrap: true,
-                  itemCount: clinicOwnerRegistration.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text(
-                                'Registration Request',
-                                style: bodyBoldPoppins,
-                              ),
-                              content: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Name',
-                                    style: smallSemiboldPoppins,
-                                  ),
-                                  Text(
-                                    '${clinicOwnerRegistration[index]['firstName']} ${clinicOwnerRegistration[index]['lastName']}',
-                                    style: smallRegularPoppins,
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  const Text(
-                                    'Clinic',
-                                    style: smallSemiboldPoppins,
-                                  ),
-                                  Text(
-                                    '${clinicOwnerRegistration[index]['clinic']}',
-                                    style: smallRegularPoppins,
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  const Text(
-                                    'Location',
-                                    style: smallSemiboldPoppins,
-                                  ),
-                                  Text(
-                                    '${clinicOwnerRegistration[index]['location']}',
-                                    style: smallRegularPoppins,
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  const Text(
-                                    'Business Permit',
-                                    style: smallSemiboldPoppins,
-                                  ),
-                                  Text(
-                                    '${clinicOwnerRegistration[index]['businessPermit']}',
-                                    style: smallRegularPoppins,
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text(
-                                    'Decline',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(); // Close the dialog
-                                  },
-                                ),
-                                TextButton(
-                                  child: const Text(
-                                    'Approve',
-                                    style: TextStyle(
-                                      color: lightSecondaryColor,
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(); // Close the dialog
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${clinicOwnerRegistration[index]['clinic']}',
-                                style: bodyRegularPoppins,
-                              ),
-                              Text(
-                                '${clinicOwnerRegistration[index]['location']}',
-                                style: smallSemiboldPoppins,
-                              ),
-                              Text(
-                                'Owned by: ${clinicOwnerRegistration[index]['firstName']} ${clinicOwnerRegistration[index]['lastName']}',
-                                style: smallRegularPoppins,
-                              ),
-                            ],
-                          ),
+              child: Obx(
+                () => controller.isLoading.value
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: lightAccentColor,
                         ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(
+                          bottom: 15.0,
+                        ),
+                        shrinkWrap: true,
+                        itemCount:
+                            controller.clinicsForVerification.value.length,
+                        itemBuilder: (context, index) {
+                          final clinicVerifInfo =
+                              controller.clinicsForVerification.value[index];
+
+                          return GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text(
+                                      'Registration Request',
+                                      style: bodyBoldPoppins,
+                                    ),
+                                    content: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'Name',
+                                          style: smallSemiboldPoppins,
+                                        ),
+                                        Text(
+                                          '${clinicVerifInfo.owner.givenName} ${clinicVerifInfo.owner.familyName}',
+                                          style: smallRegularPoppins,
+                                        ),
+                                        const SizedBox(
+                                          height: 10.0,
+                                        ),
+                                        const Text(
+                                          'Clinic',
+                                          style: smallSemiboldPoppins,
+                                        ),
+                                        Text(
+                                          clinicVerifInfo.name,
+                                          style: smallRegularPoppins,
+                                        ),
+                                        const SizedBox(
+                                          height: 10.0,
+                                        ),
+                                        const Text(
+                                          'Location',
+                                          style: smallSemiboldPoppins,
+                                        ),
+                                        Text(
+                                          clinicVerifInfo.location,
+                                          style: smallRegularPoppins,
+                                        ),
+                                        const SizedBox(
+                                          height: 10.0,
+                                        ),
+                                        const Text(
+                                          'Business Permit',
+                                          style: smallSemiboldPoppins,
+                                        ),
+                                        Text(
+                                          clinicVerifInfo.businessPermit,
+                                          style: smallRegularPoppins,
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text(
+                                          'Decline',
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: const Text(
+                                          'Approve',
+                                          style: TextStyle(
+                                            color: lightSecondaryColor,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      clinicVerifInfo.name,
+                                      style: bodyRegularPoppins,
+                                    ),
+                                    Text(
+                                      clinicVerifInfo.location,
+                                      style: smallSemiboldPoppins,
+                                    ),
+                                    Text(
+                                      'Owned by: ${clinicVerifInfo.owner.givenName} ${clinicVerifInfo.owner.familyName}',
+                                      style: smallRegularPoppins,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  }),
+              ),
             ),
           ],
         ),
