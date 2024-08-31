@@ -3,8 +3,10 @@ sql:
   - engine: "mysql"
     queries:
       - "auth/sqlc/query.sql"
+      - "pets/sqlc/query.sql"
     schema:
       - "auth/sqlc/schema.sql"
+      - "pets/sqlc/schema.sql"
     gen:
       go:
         package: "mysqlc"

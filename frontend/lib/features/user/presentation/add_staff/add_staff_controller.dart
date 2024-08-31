@@ -5,7 +5,7 @@ import 'package:frontend/features/auth/domain/user/user_model.dart';
 import 'package:frontend/utils/dio/dio_client.dart';
 import 'package:get/get.dart';
 
-class RegisterController extends GetxController {
+class AddStaffController extends GetxController {
   final SessionController sessionController = Get.find();
   final DioClient dioClient = DioClient();
   final formKey = GlobalKey<FormState>();
@@ -13,10 +13,9 @@ class RegisterController extends GetxController {
   final firstName = TextEditingController();
   final lastName = TextEditingController();
   final emailField = TextEditingController();
-  final passwordField = TextEditingController();
-  final confirmPasswordField = TextEditingController();
+  final RxString userRole = 'Veterinarian'.obs;
 
-  Future<void> register() async {
+  Future<void> addStaff(int clinicId) async {
     if (formKey.currentState!.validate()) {
       Get.defaultDialog(
         title: 'Loading...',
@@ -32,9 +31,9 @@ class RegisterController extends GetxController {
           'register',
           data: {
             "Email": emailField.text,
-            "Password": passwordField.text,
             "GivenName": firstName.text,
             "FamilyName": lastName.text,
+            "userRole": userRole.value,
           },
         );
 

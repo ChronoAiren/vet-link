@@ -48,7 +48,7 @@ class AddPetScreen extends StatelessWidget {
         height: MediaQuery.of(context).size.height,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start
           children: [
             Container(
               padding: const EdgeInsets.all(8.0),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/common/controllers/session_controller.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:frontend/common/constants/routes.dart';
 import 'package:frontend/common/controllers/_bindings.dart';
@@ -8,6 +9,7 @@ import 'package:get/get.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put<SessionController>(SessionController(), permanent: true);
   runApp(const MyApp());
 }
 

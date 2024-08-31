@@ -7,6 +7,7 @@ import 'package:frontend/features/auth/presentation/login/login_controller.dart'
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
+import 'package:frontend/utils/validator.dart';
 import 'package:get/get.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -92,6 +93,8 @@ class LoginScreen extends StatelessWidget {
                                     prefixIcon: const Icon(Icons.email_rounded),
                                     labelText: 'Email',
                                     floatLabel: true,
+                                    validator: Validator().email,
+                                    keyboardType: TextInputType.emailAddress,
                                   ),
                                   const SizedBox(
                                     height: 15.0,
@@ -102,6 +105,7 @@ class LoginScreen extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(5),
                                       floatLabel: true,
                                       labelText: 'Password',
+                                      validator: Validator().notEmpty,
                                       prefixIcon: const Icon(Icons.lock),
                                       obscureText:
                                           loginController.getIsPwObscure(),
@@ -125,7 +129,7 @@ class LoginScreen extends StatelessWidget {
                             CustomAccentButton(
                               buttonLabel: 'Login',
                               onPressed: () {
-                                Navigator.pushNamed(context, '/home');
+                                loginController.signIn();
                               },
                             ),
                             const SizedBox(

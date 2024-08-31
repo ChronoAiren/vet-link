@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/common/widgets/custom_accent_button.dart';
 import 'package:frontend/common/widgets/cutom_text_field.dart';
+import 'package:frontend/features/user/presentation/add_staff/add_staff_controller.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
@@ -10,7 +11,7 @@ import 'package:get/get.dart';
 class AddStaffScreen extends StatelessWidget {
   AddStaffScreen({super.key});
 
-  final RxString userRole = 'Veterinarian'.obs;
+  final controller = Get.put(AddStaffController());
 
   @override
   Widget build(BuildContext context) {
@@ -160,9 +161,9 @@ class AddStaffScreen extends StatelessWidget {
                                       Obx(
                                         () => Radio(
                                           value: "Veterinarian",
-                                          groupValue: userRole.value,
+                                          groupValue: controller.userRole.value,
                                           onChanged: (value) {
-                                            userRole.value = value!;
+                                            controller.userRole.value = value!;
                                           },
                                         ),
                                       ),
@@ -197,9 +198,9 @@ class AddStaffScreen extends StatelessWidget {
                                       Obx(
                                         () => Radio(
                                           value: "Receptionist",
-                                          groupValue: userRole.value,
+                                          groupValue: controller.userRole.value,
                                           onChanged: (value) {
-                                            userRole.value = value!;
+                                            controller.userRole.value = value!;
                                           },
                                         ),
                                       ),
