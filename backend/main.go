@@ -1,39 +1,56 @@
 package main
 
 import (
-	"backend/auth"
-	"backend/pets"
+	"backend/framework"
+	"backend/services/clinicowners"
+	"backend/services/petowners"
+	"backend/services/users"
+	"backend/store"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"gopkg.in/yaml.v3"
+	"os"
 )
 
-func run() error {
-	backend := echo.New()
-	backend.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
-
-	authSvc := auth.New(database, backend)
-	authSvc.AddRoutes()
-
-	petsSvc := pets.New(database, backend)
-	petsSvc.AddRoutes()
-
-	address := ":" + env["BE_PORT"]
-	if err := backend.Start(address); err != nil {
-		return err
+func run() (err error) {
+	d, err := store.NewDatabase(env.Dsn)
+	if err != nil {
+		return
 	}
-	return nil
+
+	f := framework.New(echo.New(), *d)
+	f.Api.Use(middleware.CORS())
+	f.RegisterServices(
+		users.New(),
+		petowners.New(),
+		clinicowners.New(),
+	)
+	f.Api.GET("/test", func(c echo.Context) error {
+		return c.String(200, "Hello, World!")
+	})
+
+	err = f.Api.Start(env.Port)
+	return
+}
+
+func init() {
+	if file, err := os.ReadFile("backend.yaml"); err != nil {
+		panic(err)
+	} else if err = yaml.Unmarshal(file, &env); err != nil {
+		panic(err)
+	}
 }
 
 func main() {
-	if env == nil {
-		panic("env not found")
-	}
 	if err := run(); err != nil {
 		panic(err)
 	}
 }
+
+type Environment struct {
+	Dsn  string `yaml:"dsn"`
+	Port string `yaml:"port"`
+}
+
+var env Environment
