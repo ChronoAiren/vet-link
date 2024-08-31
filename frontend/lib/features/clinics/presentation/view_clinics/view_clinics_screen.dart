@@ -109,9 +109,10 @@ class ViewClinicsScreen extends StatelessWidget {
                             ),
                           ],
                         )
-                      )
+                      ),
                     );
                   },
+                   title: Text(clinics[index]['clinic']!),
                  )
                  );
               },
