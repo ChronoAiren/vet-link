@@ -13,11 +13,7 @@ class AddPetScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              child: Text('add pet screen'),
-            )
-          ],
+          children: [Text('add pet screen')],
         ),
       ),
       fab: FloatingActionButton(

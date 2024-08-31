@@ -24,6 +24,7 @@ mixin _$Clinic {
   String get name => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   String get businessPermit => throw _privateConstructorUsedError;
+  User get owner => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -35,7 +36,14 @@ abstract class $ClinicCopyWith<$Res> {
   factory $ClinicCopyWith(Clinic value, $Res Function(Clinic) then) =
       _$ClinicCopyWithImpl<$Res, Clinic>;
   @useResult
-  $Res call({int id, String name, String location, String businessPermit});
+  $Res call(
+      {int id,
+      String name,
+      String location,
+      String businessPermit,
+      User owner});
+
+  $UserCopyWith<$Res> get owner;
 }
 
 /// @nodoc
@@ -55,6 +63,7 @@ class _$ClinicCopyWithImpl<$Res, $Val extends Clinic>
     Object? name = null,
     Object? location = null,
     Object? businessPermit = null,
+    Object? owner = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -73,7 +82,19 @@ class _$ClinicCopyWithImpl<$Res, $Val extends Clinic>
           ? _value.businessPermit
           : businessPermit // ignore: cast_nullable_to_non_nullable
               as String,
+      owner: null == owner
+          ? _value.owner
+          : owner // ignore: cast_nullable_to_non_nullable
+              as User,
     ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $UserCopyWith<$Res> get owner {
+    return $UserCopyWith<$Res>(_value.owner, (value) {
+      return _then(_value.copyWith(owner: value) as $Val);
+    });
   }
 }
 
@@ -84,7 +105,15 @@ abstract class _$$ClinicImplCopyWith<$Res> implements $ClinicCopyWith<$Res> {
       __$$ClinicImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, String name, String location, String businessPermit});
+  $Res call(
+      {int id,
+      String name,
+      String location,
+      String businessPermit,
+      User owner});
+
+  @override
+  $UserCopyWith<$Res> get owner;
 }
 
 /// @nodoc
@@ -102,6 +131,7 @@ class __$$ClinicImplCopyWithImpl<$Res>
     Object? name = null,
     Object? location = null,
     Object? businessPermit = null,
+    Object? owner = null,
   }) {
     return _then(_$ClinicImpl(
       id: null == id
@@ -120,6 +150,10 @@ class __$$ClinicImplCopyWithImpl<$Res>
           ? _value.businessPermit
           : businessPermit // ignore: cast_nullable_to_non_nullable
               as String,
+      owner: null == owner
+          ? _value.owner
+          : owner // ignore: cast_nullable_to_non_nullable
+              as User,
     ));
   }
 }
@@ -131,7 +165,8 @@ class _$ClinicImpl implements _Clinic {
       {required this.id,
       required this.name,
       required this.location,
-      required this.businessPermit});
+      required this.businessPermit,
+      required this.owner});
 
   factory _$ClinicImpl.fromJson(Map<String, dynamic> json) =>
       _$$ClinicImplFromJson(json);
@@ -144,10 +179,12 @@ class _$ClinicImpl implements _Clinic {
   final String location;
   @override
   final String businessPermit;
+  @override
+  final User owner;
 
   @override
   String toString() {
-    return 'Clinic(id: $id, name: $name, location: $location, businessPermit: $businessPermit)';
+    return 'Clinic(id: $id, name: $name, location: $location, businessPermit: $businessPermit, owner: $owner)';
   }
 
   @override
@@ -160,13 +197,14 @@ class _$ClinicImpl implements _Clinic {
             (identical(other.location, location) ||
                 other.location == location) &&
             (identical(other.businessPermit, businessPermit) ||
-                other.businessPermit == businessPermit));
+                other.businessPermit == businessPermit) &&
+            (identical(other.owner, owner) || other.owner == owner));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, name, location, businessPermit);
+      Object.hash(runtimeType, id, name, location, businessPermit, owner);
 
   @JsonKey(ignore: true)
   @override
@@ -187,7 +225,8 @@ abstract class _Clinic implements Clinic {
       {required final int id,
       required final String name,
       required final String location,
-      required final String businessPermit}) = _$ClinicImpl;
+      required final String businessPermit,
+      required final User owner}) = _$ClinicImpl;
 
   factory _Clinic.fromJson(Map<String, dynamic> json) = _$ClinicImpl.fromJson;
 
@@ -199,6 +238,8 @@ abstract class _Clinic implements Clinic {
   String get location;
   @override
   String get businessPermit;
+  @override
+  User get owner;
   @override
   @JsonKey(ignore: true)
   _$$ClinicImplCopyWith<_$ClinicImpl> get copyWith =>

@@ -11,6 +11,7 @@ _$ClinicImpl _$$ClinicImplFromJson(Map<String, dynamic> json) => _$ClinicImpl(
       name: json['name'] as String,
       location: json['location'] as String,
       businessPermit: json['businessPermit'] as String,
+      owner: User.fromJson(json['owner'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$ClinicImplToJson(_$ClinicImpl instance) =>
@@ -19,4 +20,5 @@ Map<String, dynamic> _$$ClinicImplToJson(_$ClinicImpl instance) =>
       'name': instance.name,
       'location': instance.location,
       'businessPermit': instance.businessPermit,
+      'owner': instance.owner,
     };
