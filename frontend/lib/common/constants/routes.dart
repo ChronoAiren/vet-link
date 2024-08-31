@@ -24,6 +24,6 @@ class AppPages {
     GetPage(name: '/add_staff', page: () => AddStaffScreen()),
     GetPage(name: '/home', page: () => HomeScreen()),
     GetPage(name: '/view_pets', page: () => ViewPetScreen()),
-    GetPage(name: '/add_pet', page: () => const AddPetScreen()),
+    GetPage(name: '/add_pet', page: () => AddPetScreen()),
   ];
 }

@@ -93,7 +93,6 @@ class ViewStaffsScreen extends StatelessWidget {
                                     );
                                   },
                                 );
-
                                 return result == true;
                               }
                               return false;
