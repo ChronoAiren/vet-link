@@ -14,7 +14,8 @@ import (
 )
 
 func run() (err error) {
-	d, err := store.NewDatabase(env.Dsn)
+	var d *store.Store
+	d, err = store.NewDatabase(env.Dsn)
 	if err != nil {
 		return
 	}

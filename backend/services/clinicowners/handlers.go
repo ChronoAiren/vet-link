@@ -6,32 +6,61 @@ import (
 	g "backend/globals"
 	"backend/services/users"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
 func (s *Service) listClinicOwners(c echo.Context) (err error) {
-	usersChan := make(chan []users.UserResponse)
+	clinicsChan := make(chan []ClinicResponse)
 	errChan := make(chan error)
 	go func() {
-		userSlice, err := users.ListUsers(
-			my.NewContext(c), s.Store.Db,
-			SelectWhere.Users.RoleID.In(
-				g.RoleClinicOwner,
-				g.RoleUnverifiedClinicOwner,
-			),
-		)
-		if err != nil {
+		ctx := my.NewContext(c)
+		var clinicSlice ClinicSlice
+		req := new(ListClinicOwnersRequest)
+		if err = c.Bind(req); err != nil {
 			errChan <- err
 			return
 		}
-		usersChan <- userSlice
+		if req.Verified != nil {
+			if *req.Verified {
+				if clinicSlice, err = ListClinics(ctx, s.Store,
+					SelectWhere.Users.RoleID.EQ(g.RoleClinicOwner),
+				); err != nil {
+					errChan <- err
+					return
+				}
+			} else if clinicSlice, err = ListClinics(ctx, s.Store,
+				SelectWhere.Users.RoleID.EQ(g.RoleUnverifiedClinicOwner),
+			); err != nil {
+				errChan <- err
+				return
+			}
+		} else {
+			if clinicSlice, err = ListClinics(ctx, s.Store); err != nil {
+				errChan <- err
+				return
+			}
+		}
+		var clinicsDTO []ClinicResponse
+		for _, clinic := range clinicSlice {
+			clinicsDTO = append(clinicsDTO, ClinicResponse{
+				ID:         clinic.ID,
+				ClinicName: clinic.Name,
+				Location:   clinic.Location,
+				BusinessNo: clinic.BusinessNo,
+				User: users.UserResponse{
+					ID:         clinic.UserID,
+					Email:      clinic.R.User.Email,
+					FamilyName: clinic.R.User.FamilyName,
+					GivenName:  clinic.R.User.GivenName,
+				},
+			})
+		}
+		clinicsChan <- clinicsDTO
 	}()
 	select {
-	case userSlice := <-usersChan:
-		return c.JSON(http.StatusOK, userSlice)
+	case clinics := <-clinicsChan:
+		return c.JSON(http.StatusOK, clinics)
 	case err := <-errChan:
-		log.Println("WTF!")
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 }

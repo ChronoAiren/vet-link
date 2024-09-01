@@ -9,53 +9,46 @@ import (
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
 )
 
-func ListUsers(c *my.Context, db *bob.DB, args ...bob.Mod[*dialect.SelectQuery]) ([]UserResponse, error) {
-	if users, err := Users.Query(c.GetContext(), db, PreloadUserRole()).All(); err != nil {
-		return nil, err
-	} else {
-		var userDTOs []UserResponse
-		for _, user := range users {
-			userDTOs = append(userDTOs, UserResponse{
-				Email:      user.Email,
-				FamilyName: user.FamilyName,
-				GivenName:  user.GivenName,
-				Role:       user.R.Role.Description,
-			})
-		}
-		return userDTOs, nil
-	}
+func ListUsers(c *my.Context, s *store.Store, args ...bob.Mod[*dialect.SelectQuery]) (UserSlice, error) {
+	return Users.Query(c.GetContext(), s.Db,
+		append(args, PreloadUserRole())...,
+	).All()
 }
 
-func InsertUser(echo *my.Context, s *store.Store, roleID uint8) (u *User, err error) {
+func InsertUser(c *my.Context, s *store.Store, roleID uint8) (u *User, err error) {
 	params := new(InsertUserRequest)
-	if err = echo.Api.Bind(params); err != nil {
-		return
-	}
-	params.RoleID = roleID
-	err = s.Transact(echo.GetContext(), func(tx *bob.Tx) error {
-		u, err = Users.Insert(echo.GetContext(), tx, &UserSetter{
-			GivenName:  omit.From(params.GivenName),
-			FamilyName: omit.From(params.FamilyName),
-			Email:      omit.From(params.Email),
-			Password:   omit.From(params.Password),
-			RoleID:     omit.From(params.RoleID),
+	if err = c.Api.Bind(params); err == nil {
+		err = s.Transact(c.GetContext(), func(tx *bob.Tx) error {
+			u, err = Users.Insert(c.GetContext(), tx, &UserSetter{
+				GivenName:  omit.From(params.GivenName),
+				FamilyName: omit.From(params.FamilyName),
+				Email:      omit.From(params.Email),
+				Password:   omit.From(params.Password),
+				RoleID:     omit.From(roleID),
+			})
+			return err
 		})
-		return err
-	})
+	}
 	return
 }
 
 type InsertUserRequest struct {
-	Email      string `json:"Email" path:"Email" query:"Email" form:"Email"`
-	Password   string `json:"Password" path:"Password" query:"Password" form:"Password"`
-	FamilyName string `json:"FamilyName" path:"FamilyName" query:"FamilyName" form:"FamilyName"`
-	GivenName  string `json:"GivenName" path:"GivenName" query:"GivenName" form:"GivenName"`
-	RoleID     uint8  `json:"RoleID,omitempty" path:"RoleID" query:"RoleID" form:"RoleID"`
+	Email      string `json:"email" path:"email" query:"email" form:"email"`
+	Password   string `json:"password" path:"password" query:"password" form:"password"`
+	FamilyName string `json:"familyName" path:"familyName" query:"familyName" form:"familyName"`
+	GivenName  string `json:"givenName" path:"givenName" query:"givenName" form:"givenName"`
+	RoleID     uint8  `json:"roleId,omitempty" path:"roleId" query:"roleId" form:"roleId"`
 }
 
 type UserResponse struct {
-	Email      string
-	FamilyName string
-	GivenName  string
-	Role       string
+	ID         uint32 `json:"id"`
+	Email      string `json:"email"`
+	FamilyName string `json:"familyName"`
+	GivenName  string `json:"givenName"`
+	Role       string `json:"role,omitempty"`
+}
+
+type LoginUserRequest struct {
+	Email    string `json:"email" path:"email" query:"email" form:"email"`
+	Password string `json:"password" path:"password" query:"password" form:"password"`
 }

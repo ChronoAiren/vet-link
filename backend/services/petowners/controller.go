@@ -1,23 +1,23 @@
 package petowners
 
 import (
+	"backend/framework"
 	"backend/store"
-	"github.com/labstack/echo/v4"
 )
 
 type Service struct {
 	Store *store.Store
-	Api   *echo.Echo
+	Api   *framework.Framework
 }
 
 func New() *Service { return &Service{} }
 
-func (s *Service) Inject(db *store.Store, api *echo.Echo) {
+func (s *Service) Inject(db *store.Store, api *framework.Framework) {
 	s.Store = db
 	s.Api = api
 }
 
-func (s *Service) Serve() {
-	s.Api.GET("/pet-owners", s.listPetOwners)
-	s.Api.POST("/pet-owners", s.createPetOwner)
+func (s *Service) Serve(f *framework.Framework) {
+	s.Api.Api.GET("/pet-owners", s.listPetOwners)
+	s.Api.Api.POST("/pet-owners", s.createPetOwner)
 }

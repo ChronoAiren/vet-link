@@ -1,23 +1,24 @@
 package users
 
 import (
+	"backend/framework"
 	"backend/store"
-	"github.com/labstack/echo/v4"
 )
 
 type Service struct {
-	Store *store.Store
-	Api   *echo.Echo
+	Store     *store.Store
+	Framework *framework.Framework
 }
 
 func New() *Service { return &Service{} }
 
-func (s *Service) Inject(db *store.Store, api *echo.Echo) {
+func (s *Service) Inject(db *store.Store, f *framework.Framework) {
+	s.Framework = f
 	s.Store = db
-	s.Api = api
 }
 
-func (s *Service) Serve() {
-	s.Api.GET("/users", s.listUsers)
-	s.Api.POST("/users", s.createUser)
+func (s *Service) Serve(f *framework.Framework) {
+	f.Mux().Get("/users", s.handleReadAll)
+	f.Mux().Post("/users", s.handleCreate)
+	f.Mux().Post("/login", s.handleLogin)
 }

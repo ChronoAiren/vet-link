@@ -12,14 +12,14 @@ type Framework struct {
 }
 
 type Service interface {
-	Inject(db *store.Store, api *echo.Echo)
-	Serve()
+	Inject(db *store.Store, api *Framework)
+	Serve(mux *Framework)
 }
 
-func (f Framework) RegisterServices(services ...Service) {
+func (f *Framework) RegisterServices(services ...Service) {
 	for _, service := range services {
-		service.Inject(f.Database, f.Api)
-		service.Serve()
+		service.Inject(f.Database, f)
+		service.Serve(f)
 	}
 }
 
@@ -40,10 +40,4 @@ func NewContext(c echo.Context) *Context {
 
 func (c *Context) GetContext() context.Context {
 	return c.Api.Request().Context()
-}
-
-func Bind[T any](c *Context) (*T, error) {
-	param := new(T)
-	err := c.Api.Bind(&param)
-	return param, err
 }

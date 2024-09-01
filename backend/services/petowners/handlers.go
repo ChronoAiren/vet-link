@@ -10,11 +10,11 @@ import (
 )
 
 func (s *Service) listPetOwners(c echo.Context) (err error) {
-	usersChan := make(chan []users.UserResponse)
+	usersChan := make(chan UserSlice)
 	errChan := make(chan error)
 	go func() {
-		userSlice, err := users.ListUsers(
-			my.NewContext(c), s.Store.Db,
+		ctx := my.NewContext(c)
+		userSlice, err := users.ListUsers(ctx, s.Store,
 			SelectWhere.Users.RoleID.EQ(g.RoleDefault),
 		)
 		if err != nil {
@@ -25,7 +25,7 @@ func (s *Service) listPetOwners(c echo.Context) (err error) {
 	}()
 	select {
 	case userSlice := <-usersChan:
-		return c.JSON(http.StatusOK, userSlice) // Optimized JSON response
+		return c.JSON(http.StatusOK, userSlice)
 	case err := <-errChan:
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
