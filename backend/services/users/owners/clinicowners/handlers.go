@@ -4,7 +4,7 @@ import (
 	my "backend/framework"
 	. "backend/generated/models"
 	g "backend/globals"
-	"backend/services/users"
+	"backend/services/users/users"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"

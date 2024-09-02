@@ -2,9 +2,9 @@ package main
 
 import (
 	"backend/framework"
-	"backend/services/clinicowners"
-	"backend/services/petowners"
-	"backend/services/users"
+	"backend/services/users/owners/clinicowners"
+	"backend/services/users/owners/petowners"
+	"backend/services/users/users"
 	"backend/store"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"

@@ -4,7 +4,7 @@ import (
 	my "backend/framework"
 	. "backend/generated/models"
 	g "backend/globals"
-	"backend/services/users"
+	"backend/services/users/users"
 	"backend/store"
 	"errors"
 	"github.com/aarondl/opt/omit"

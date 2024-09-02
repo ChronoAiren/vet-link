@@ -2,7 +2,7 @@ package petowners
 
 import (
 	my "backend/framework"
-	"backend/services/users"
+	"backend/services/users/users"
 	"github.com/stephenafamo/bob"
 )
 
