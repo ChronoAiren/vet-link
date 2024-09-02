@@ -5,3 +5,11 @@ const (
 	RoleClinicOwner
 	RoleUnverifiedClinicOwner
 )
+
+func Elvis[T any](b bool, trueVal T, falseVal T) T {
+	if b {
+		return trueVal
+	} else {
+		return falseVal
+	}
+}

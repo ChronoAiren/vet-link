@@ -6,19 +6,19 @@ import (
 )
 
 type Service struct {
-	Store *store.Store
-	Api   *framework.Framework
+	Store     *store.Store
+	Framework *framework.Framework
 }
 
 func New() *Service { return &Service{} }
 
-func (s *Service) Inject(db *store.Store, api *framework.Framework) {
+func (s *Service) Inject(db *store.Store, f *framework.Framework) {
+	s.Framework = f
 	s.Store = db
-	s.Api = api
 }
 
 func (s *Service) Serve(f *framework.Framework) {
-	s.Api.Api.GET("/clinic-owners", s.listClinicOwners)
-	s.Api.Api.POST("/clinic-owners", s.createClinicOwner)
-	//s.Api.POST("/clinic-owners/:id/verify", s.verifyClinicOwner)
+	f.Mux().Get("/clinic-owners", s.handleReadAll)
+	f.Mux().Post("/clinic-owners", s.handleCreate)
+	f.Mux().Post("/clinic-owners/:id/verify", s.handleVerify)
 }

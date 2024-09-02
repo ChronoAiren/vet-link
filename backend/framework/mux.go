@@ -20,8 +20,10 @@ func (f *Framework) Mux() struct {
 	}
 }
 
-type HandlerFunc func(c *Context, data chan<- interface{}, err chan<- error)
+type HandlerFunc func(c *Context, data ResultChan, err ErrorChan)
 type RequestMethod func(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+type ResultChan chan<- any
+type ErrorChan chan<- error
 
 func runMethod(requestFn RequestMethod, path string, mainFn HandlerFunc) {
 	requestFn(path, func(c echo.Context) error {

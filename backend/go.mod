@@ -6,7 +6,6 @@ require (
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/jaswdr/faker/v2 v2.3.0
-	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/stephenafamo/bob v0.28.1
 	gopkg.in/yaml.v3 v3.0.1

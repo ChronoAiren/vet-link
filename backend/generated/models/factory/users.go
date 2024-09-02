@@ -380,7 +380,7 @@ func (o UserTemplate) createMany(ctx context.Context, exec bob.Executor, number 
 	return ctx, m, nil
 }
 
-// User has methods that act as mods for the UserTemplate
+// Owner has methods that act as mods for the UserTemplate
 var UserMods userMods
 
 type userMods struct{}

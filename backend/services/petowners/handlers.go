@@ -2,47 +2,40 @@ package petowners
 
 import (
 	my "backend/framework"
-	. "backend/generated/models"
-	g "backend/globals"
 	"backend/services/users"
-	"github.com/labstack/echo/v4"
-	"net/http"
+	"github.com/stephenafamo/bob"
 )
 
-func (s *Service) listPetOwners(c echo.Context) (err error) {
-	usersChan := make(chan UserSlice)
-	errChan := make(chan error)
-	go func() {
-		ctx := my.NewContext(c)
-		userSlice, err := users.ListUsers(ctx, s.Store,
-			SelectWhere.Users.RoleID.EQ(g.RoleDefault),
-		)
-		if err != nil {
-			errChan <- err
-			return
+func (s *Service) handleReadAll(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	if userSlice, e := users.ListUsers(c, s.Store); e != nil {
+		err <- e
+	} else {
+		var dtoSlice []users.UserResponse
+		for _, user := range userSlice {
+			dtoSlice = append(dtoSlice, users.UserResponse{
+				ID:         user.ID,
+				Email:      user.Email,
+				FamilyName: user.FamilyName,
+				GivenName:  user.GivenName,
+				Role:       user.R.Role.Description,
+			})
 		}
-		usersChan <- userSlice
-	}()
-	select {
-	case userSlice := <-usersChan:
-		return c.JSON(http.StatusOK, userSlice)
-	case err := <-errChan:
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		data <- dtoSlice
 	}
 }
 
-func (s *Service) createPetOwner(c echo.Context) (err error) {
-	errChan := make(chan error)
-	go func() {
-		ctx := my.NewContext(c)
-		if _, err := users.InsertUser(ctx, s.Store, g.RoleDefault); err != nil {
-			errChan <- err
+func (s *Service) handleCreate(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	params := new(users.CreateRequest)
+	if e := c.Api.Bind(params); e != nil {
+		err <- e
+	} else if e = s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
+		user, e := users.InsertUser(c, tx, params)
+		if e != nil {
+			return e
 		}
-	}()
-	select {
-	case err := <-errChan:
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	default:
-		return c.String(http.StatusCreated, "User created")
+		data <- user
+		return nil
+	}); e != nil {
+		err <- e
 	}
 }

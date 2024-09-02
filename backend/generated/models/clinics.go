@@ -398,7 +398,7 @@ func (o *Clinic) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "User":
+	case "Owner":
 		rel, ok := retrieved.(*User)
 		if !ok {
 			return fmt.Errorf("clinic cannot load %T as %q", retrieved, name)
@@ -417,7 +417,7 @@ func (o *Clinic) Preload(name string, retrieved any) error {
 
 func PreloadClinicUser(opts ...mysql.PreloadOption) mysql.Preloader {
 	return mysql.Preload[*User, UserSlice](orm.Relationship{
-		Name: "User",
+		Name: "Owner",
 		Sides: []orm.RelSide{
 			{
 				From: "clinics",

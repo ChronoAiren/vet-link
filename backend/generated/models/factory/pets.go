@@ -188,9 +188,6 @@ func ensureCreatablePet(m *models.PetSetter) {
 	if m.Name.IsUnset() {
 		m.Name = omit.From(random_string(nil))
 	}
-	if m.Gender.IsUnset() {
-		m.Gender = omit.From(random_uint8(nil))
-	}
 	if m.Birthdate.IsUnset() {
 		m.Birthdate = omit.From(random_time_Time(nil))
 	}

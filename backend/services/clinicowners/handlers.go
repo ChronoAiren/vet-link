@@ -5,49 +5,45 @@ import (
 	. "backend/generated/models"
 	g "backend/globals"
 	"backend/services/users"
-	"github.com/labstack/echo/v4"
-	"net/http"
+	"github.com/aarondl/opt/omit"
+	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/mysql/dialect"
+	"log"
 )
 
-func (s *Service) listClinicOwners(c echo.Context) (err error) {
-	clinicsChan := make(chan []ClinicResponse)
-	errChan := make(chan error)
-	go func() {
-		ctx := my.NewContext(c)
-		var clinicSlice ClinicSlice
-		req := new(ListClinicOwnersRequest)
-		if err = c.Bind(req); err != nil {
-			errChan <- err
-			return
-		}
-		if req.Verified != nil {
-			if *req.Verified {
-				if clinicSlice, err = ListClinics(ctx, s.Store,
-					SelectWhere.Users.RoleID.EQ(g.RoleClinicOwner),
-				); err != nil {
-					errChan <- err
-					return
-				}
-			} else if clinicSlice, err = ListClinics(ctx, s.Store,
-				SelectWhere.Users.RoleID.EQ(g.RoleUnverifiedClinicOwner),
-			); err != nil {
-				errChan <- err
-				return
-			}
-		} else {
-			if clinicSlice, err = ListClinics(ctx, s.Store); err != nil {
-				errChan <- err
-				return
-			}
-		}
-		var clinicsDTO []ClinicResponse
-		for _, clinic := range clinicSlice {
-			clinicsDTO = append(clinicsDTO, ClinicResponse{
+func (s *Service) handleReadAll(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	type clinicResponse struct {
+		ID         uint32             `json:"id"`
+		ClinicName string             `json:"clinicName"`
+		Location   string             `json:"location"`
+		BusinessNo string             `json:"businessNo"`
+		Owner      users.UserResponse `json:"owner"`
+	}
+	params := new(ListClinicOwnersRequest)
+	if e := c.Api.Bind(params); e != nil {
+		err <- e
+		return
+	}
+	var args []bob.Mod[*dialect.SelectQuery]
+	if params.Verified != nil {
+		args = append(args, SelectWhere.Users.RoleID.EQ(
+			g.Elvis(*params.Verified,
+				g.RoleClinicOwner,
+				g.RoleUnverifiedClinicOwner,
+			),
+		))
+	}
+	if clinics, e := ListClinics(c, s.Store, args...); e != nil {
+		err <- e
+	} else {
+		var dtoSlice []clinicResponse
+		for _, clinic := range clinics {
+			dtoSlice = append(dtoSlice, clinicResponse{
 				ID:         clinic.ID,
 				ClinicName: clinic.Name,
 				Location:   clinic.Location,
 				BusinessNo: clinic.BusinessNo,
-				User: users.UserResponse{
+				Owner: users.UserResponse{
 					ID:         clinic.UserID,
 					Email:      clinic.R.User.Email,
 					FamilyName: clinic.R.User.FamilyName,
@@ -55,28 +51,65 @@ func (s *Service) listClinicOwners(c echo.Context) (err error) {
 				},
 			})
 		}
-		clinicsChan <- clinicsDTO
-	}()
-	select {
-	case clinics := <-clinicsChan:
-		return c.JSON(http.StatusOK, clinics)
-	case err := <-errChan:
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		data <- dtoSlice
 	}
 }
 
-func (s *Service) createClinicOwner(c echo.Context) (err error) {
-	errChan := make(chan error)
-	go func() {
-		ctx := my.NewContext(c)
-		if _, err := users.InsertUser(ctx, s.Store, g.RoleDefault); err != nil {
-			errChan <- err
+func (s *Service) handleCreate(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	params := new(CreateRequest)
+	if e := c.Api.Bind(params); e != nil {
+		err <- e
+	} else if e = s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
+		if user, e := users.InsertUser(c, tx, params); e != nil {
+			return e
+		} else {
+			params.User = user
+			clinic, e := InsertClinic(c, tx, params)
+			if e != nil {
+				return e
+			}
+			data <- clinic
 		}
-	}()
-	select {
-	case err := <-errChan:
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	default:
-		return c.String(http.StatusCreated, "User and Clinic created")
+		return nil
+	}); e != nil {
+		err <- e
+	}
+}
+
+func (s *Service) handleVerify(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	log.Println("verify endpoint called")
+	params := new(VerifyRequest)
+	log.Println(c.Api.Path())
+	if e := c.Api.Bind(params); e != nil {
+		err <- e
+	} else if e = s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
+		log.Println(params.Id)
+		if clinic, e := Clinics.Query(c.GetContext(), tx,
+			SelectWhere.Clinics.ID.EQ(params.Id),
+			PreloadClinicUser(),
+		).One(); e != nil {
+			return e
+		} else if e = clinic.R.User.Update(c.GetContext(), tx, &UserSetter{
+			RoleID: omit.From(g.RoleClinicOwner),
+		}); e != nil {
+			log.Println(clinic)
+			return e
+		} else {
+			data <- ClinicResponse{
+				ID:         clinic.ID,
+				ClinicName: clinic.Name,
+				Location:   clinic.Location,
+				BusinessNo: clinic.BusinessNo,
+				Owner: users.UserResponse{
+					ID:         clinic.UserID,
+					Email:      clinic.R.User.Email,
+					FamilyName: clinic.R.User.FamilyName,
+					GivenName:  clinic.R.User.GivenName,
+				},
+			}
+			return nil
+		}
+	}); e != nil {
+		err <- e
 	}
 }

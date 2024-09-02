@@ -3,11 +3,11 @@ package users
 import (
 	my "backend/framework"
 	. "backend/generated/models"
-	g "backend/globals"
+	"github.com/stephenafamo/bob"
 )
 
-func (s *Service) handleReadAll(c *my.Context, data chan<- interface{}, err chan<- error) {
-	if users, e := ListUsers(c, s.Store); e != nil {
+func (s *Service) handleReadAll(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	if users, e := Users.Query(c.GetContext(), s.Store.Db, PreloadUserRole()).All(); e != nil {
 		err <- e
 	} else {
 		var dtoSlice []UserResponse
@@ -24,28 +24,24 @@ func (s *Service) handleReadAll(c *my.Context, data chan<- interface{}, err chan
 	}
 }
 
-func (s *Service) handleCreate(c *my.Context, data chan<- interface{}, err chan<- error) {
-	if inserted, e := InsertUser(c, s.Store, g.RoleDefault); e != nil {
+func (s *Service) handleCreate(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	params := new(CreateRequest)
+	if e := c.Api.Bind(params); e != nil {
 		err <- e
-	} else if retrieved, e := Users.Query(
-		c.GetContext(), s.Store.Db,
-		SelectWhere.Users.Email.EQ(inserted.Email),
-		PreloadUserRole(),
-	).One(); e != nil {
-		err <- e
-	} else {
-		data <- UserResponse{
-			ID:         retrieved.ID,
-			Email:      retrieved.Email,
-			FamilyName: retrieved.FamilyName,
-			GivenName:  retrieved.GivenName,
-			Role:       retrieved.R.Role.Description,
+	} else if e = s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
+		user, e := InsertUser(c, tx, params)
+		if e != nil {
+			return e
 		}
+		data <- user
+		return nil
+	}); e != nil {
+		err <- e
 	}
 }
 
-func (s *Service) handleLogin(c *my.Context, data chan<- interface{}, err chan<- error) {
-	req := new(LoginUserRequest)
+func (s *Service) handleLogin(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	req := new(LoginRequest)
 	if e := c.Api.Bind(req); e != nil {
 		err <- e
 	} else if user, e := Users.Query(
