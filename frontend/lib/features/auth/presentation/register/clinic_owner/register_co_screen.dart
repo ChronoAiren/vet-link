@@ -108,74 +108,75 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                               () => Visibility(
                                 visible:
                                     registerCoController.activeStep.value == 3,
-                                child: const Padding(
-                                  padding: EdgeInsets.only(bottom: 30.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 30.0),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'Review Details',
                                         style: bodySemiboldPoppins,
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 30.0,
                                       ),
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(
+                                          const Text(
                                             'Name',
                                             style: bodySemiboldPoppins,
                                           ),
                                           Text(
-                                            'Jake Peralta',
+                                            "${registerCoController.firstName.text} ${registerCoController.lastName.text}",
                                             style: bodyRegularPoppins,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 20.0,
                                           ),
-                                          Text(
-                                            'Username',
+                                          const Text(
+                                            'Email',
                                             style: bodySemiboldPoppins,
                                           ),
                                           Text(
-                                            'jakey123',
+                                            registerCoController
+                                                .emailField.text,
                                             style: bodyRegularPoppins,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 20.0,
                                           ),
-                                          Text(
+                                          const Text(
                                             'Clinic',
                                             style: bodySemiboldPoppins,
                                           ),
                                           Text(
-                                            'Floydie Veterinary Clinic',
+                                            registerCoController.nameField.text,
                                             style: bodyRegularPoppins,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 20.0,
                                           ),
-                                          Text(
+                                          const Text(
                                             'Location',
                                             style: bodySemiboldPoppins,
                                           ),
                                           Text(
-                                            'Dahlia, Visayan Village, Tagum City, Davao del Norte',
+                                            registerCoController
+                                                .locationField.text,
                                             style: bodyRegularPoppins,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 20.0,
                                           ),
-                                          Text(
+                                          const Text(
                                             'Business Permit',
                                             style: bodySemiboldPoppins,
                                           ),
                                           Text(
-                                            '2323-45421-2344-6788',
+                                            registerCoController
+                                                .permitField.text,
                                             style: bodyRegularPoppins,
                                           ),
                                         ],

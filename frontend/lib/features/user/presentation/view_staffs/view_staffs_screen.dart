@@ -44,93 +44,104 @@ class ViewStaffsScreen extends StatelessWidget {
                           color: lightAccentColor,
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.only(
-                          bottom: 15.0,
-                        ),
-                        shrinkWrap: true,
-                        itemCount: controller.staffs.value.length,
-                        itemBuilder: (context, index) {
-                          final staff = controller.staffs.value[index];
-
-                          return Dismissible(
-                            key: UniqueKey(),
-                            background: Container(
-                              color: Colors.red,
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
+                    : controller.staffs.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No staffs for this clinic at the moment',
                             ),
-                            direction: DismissDirection.endToStart,
-                            confirmDismiss: (direction) async {
-                              if (direction == DismissDirection.endToStart) {
-                                final result = await showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Confirm Action'),
-                                      content: const Text(
-                                        'Are you sure you want to remove the staff account?',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: const Text(
-                                            'Cancel',
-                                            style: TextStyle(color: Colors.red),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(
+                              bottom: 15.0,
+                            ),
+                            shrinkWrap: true,
+                            itemCount: controller.staffs.length,
+                            itemBuilder: (context, index) {
+                              final staff = controller.staffs[index];
+                              return Dismissible(
+                                key: UniqueKey(),
+                                background: Container(
+                                  color: Colors.red,
+                                  child: const Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                direction: DismissDirection.endToStart,
+                                confirmDismiss: (direction) async {
+                                  if (direction ==
+                                      DismissDirection.endToStart) {
+                                    final result = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Confirm Action'),
+                                          content: const Text(
+                                            'Are you sure you want to remove the staff account?',
                                           ),
-                                          onPressed: () {
-                                            Navigator.of(context).pop(false);
-                                          },
+                                          actions: [
+                                            TextButton(
+                                              child: const Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                    color: Colors.red),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(false);
+                                              },
+                                            ),
+                                            ElevatedButton(
+                                              child: const Text('Confirm'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop(true);
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    return result == true;
+                                  }
+                                  return false;
+                                },
+                                onDismissed: (direction) {
+                                  controller.staffs.removeAt(index);
+                                },
+                                child: Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: 50,
+                                          height: 50,
+                                          child: Image.asset(
+                                            staff.userRole ==
+                                                    'VETERINARIAN STAFF'
+                                                ? 'assets/icons/vet.png'
+                                                : 'assets/icons/receptionist.png',
+                                            fit: BoxFit.contain,
+                                          ),
                                         ),
-                                        ElevatedButton(
-                                          child: const Text('Confirm'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop(true);
-                                          },
+                                        const SizedBox(
+                                          width: 20.0,
+                                        ),
+                                        Text(
+                                          '${staff.givenName} ${staff.familyName}',
+                                          style: smallRegularPoppins,
                                         ),
                                       ],
-                                    );
-                                  },
-                                );
-                                return result == true;
-                              }
-                              return false;
-                            },
-                            onDismissed: (direction) {
-                              controller.staffs.value.removeRange(index, index);
-                            },
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: 50,
-                                      height: 50,
-                                      child: Image.asset(
-                                        staff.userRole == 'VETERINARIAN'
-                                            ? 'assets/icons/vet.png'
-                                            : 'assets/icons/receptionist.png',
-                                        fit: BoxFit.contain,
-                                      ),
                                     ),
-                                    const SizedBox(
-                                      width: 20.0,
-                                    ),
-                                    Text(
-                                      '${staff.givenName} ${staff.familyName}',
-                                      style: smallRegularPoppins,
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }),
+                              );
+                            },
+                          ),
               ),
-            ),
+            )
           ],
         ),
       ),

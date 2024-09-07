@@ -9,29 +9,39 @@ class ViewStaffsController extends GetxController {
   final DioClient dioClient = DioClient();
 
   final RxBool isLoading = true.obs;
-  final staffs = RxList<User>().obs;
+  RxList<User> staffs = RxList.empty(growable: true);
+
+  @override
+  void onInit() {
+    super.onInit();
+    getStaffs();
+  }
 
   Future<void> getStaffs() async {
     int clinicId = sessionController.currentClinic?.id ?? -1;
 
     if (clinicId == -1) {
-      //Cannot detect a clinic you are affiliated with.
+      Get.snackbar(
+        'Cannot detect a clinic you are affiliated with.',
+        'Please try again later',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      isLoading.value = false;
       return;
     }
 
     try {
-      final response = await dioClient.get('staffs/$clinicId');
-
-      staffs.value =
-          response.data.map<User>((json) => User.fromJson(json)).toList();
-      isLoading.value = false;
+      final response = await dioClient.get('employees/$clinicId');
+      staffs.addAll(
+          response.data.map<User>((json) => User.fromJson(json)).toList());
     } on DioException catch (e) {
-      Get.back(); //hide dialog
       Get.snackbar(
         'Something went wrong',
         'Please try again later',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isLoading.value = false;
     }
   }
 }

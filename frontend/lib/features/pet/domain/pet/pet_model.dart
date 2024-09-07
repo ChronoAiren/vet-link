@@ -12,7 +12,8 @@ class Pet with _$Pet {
     required String name,
     required String gender,
     required String birthdate,
-    required List<Breed> breeds,
+    required int age,
+    required Breed breeds,
     required Species species,
   }) = _Pet;
 
