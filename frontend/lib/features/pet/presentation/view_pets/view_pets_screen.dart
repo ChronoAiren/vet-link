@@ -161,11 +161,10 @@ class ViewPetsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             content: SizedBox(
-              width: kIsWeb ? Get.width * 0.20 : Get.width,
-              child: AddPetScreen(),
+              width: kIsWeb ? Get.width * 0.35 : Get.width,
+              child: const AddPetScreen(),
             ),
           ),
-          barrierDismissible: false,
         ),
         tooltip: 'Add Pet',
         child: const Icon(

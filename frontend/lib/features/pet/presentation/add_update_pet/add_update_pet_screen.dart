@@ -20,20 +20,6 @@ class AddPetScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              child: const Text(
-                'Add Pet',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 15.0,
-            ),
             Row(
               children: [
                 Padding(
@@ -109,25 +95,23 @@ class AddPetScreen extends StatelessWidget {
             const SizedBox(
               height: 15.0,
             ),
-            Obx(() {
-              return TextField(
-                  controller: controller.dateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Birthdate',
-                  ),
-                  onTap: () async {
-                    DateTime? pickeddate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now());
+            TextField(
+                controller: controller.dateController,
+                decoration: const InputDecoration(
+                  labelText: 'Birthdate',
+                ),
+                onTap: () async {
+                  DateTime? pickeddate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now());
 
-                    if (pickeddate != null) {
-                      controller.selectedDate.value =
-                          DateFormat('yyyy-MM-dd').format(pickeddate);
-                    }
-                  });
-            }),
+                  if (pickeddate != null) {
+                    controller.selectedDate.value =
+                        DateFormat('yyyy-MM-dd').format(pickeddate);
+                  }
+                }),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -136,15 +120,6 @@ class AddPetScreen extends StatelessWidget {
                   child: const Text('Add Pet'),
                   onPressed: () {
                     controller.addPet();
-                  },
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                ElevatedButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Get.back();
                   },
                 ),
               ],

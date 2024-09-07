@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
+import 'package:frontend/features/user/presentation/add_staff/add_staff_screen.dart';
 import 'package:frontend/features/user/presentation/view_staffs/view_staffs_controller.dart';
+import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
 import 'package:get/get.dart';
@@ -148,9 +151,20 @@ class ViewStaffsScreen extends StatelessWidget {
       fab: FloatingActionButton(
         shape: const CircleBorder(),
         backgroundColor: lightAccentColor,
-        onPressed: () {
-          Get.toNamed('/add_staff');
-        },
+        onPressed: () => Get.dialog(
+          AlertDialog(
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? darkPrimaryColor
+                : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            content: SizedBox(
+              width: kIsWeb ? Get.width * 0.35 : Get.width,
+              child: AddStaffScreen(),
+            ),
+          ),
+        ),
         tooltip: 'Add Staff',
         child: const Icon(
           Icons.add,
