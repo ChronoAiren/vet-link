@@ -3,15 +3,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/common/widgets/custom_accent_button.dart';
 import 'package:frontend/common/widgets/custom_primary_button.dart';
 import 'package:frontend/common/widgets/cutom_text_field.dart';
+import 'package:frontend/features/auth/presentation/login/login_controller.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:frontend/styles/text_styles.dart';
-import 'package:get/get.dart' as getx;
+import 'package:frontend/utils/validator.dart';
+import 'package:get/get.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final getx.RxBool isObscurePw = true.obs;
+  final loginController = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
@@ -82,31 +84,36 @@ class LoginScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Form(
+                              key: loginController.formKey,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const CustomTextField(
-                                    prefixIcon: Icon(Icons.email_rounded),
+                                  CustomTextField(
+                                    controller: loginController.emailField,
+                                    prefixIcon: const Icon(Icons.email_rounded),
                                     labelText: 'Email',
                                     floatLabel: true,
+                                    validator: Validator().email,
+                                    keyboardType: TextInputType.emailAddress,
                                   ),
                                   const SizedBox(
                                     height: 15.0,
                                   ),
-                                  getx.Obx(
+                                  Obx(
                                     () => CustomTextField(
+                                      controller: loginController.passwordField,
                                       borderRadius: BorderRadius.circular(5),
                                       floatLabel: true,
                                       labelText: 'Password',
+                                      validator: Validator().notEmpty,
                                       prefixIcon: const Icon(Icons.lock),
-                                      obscureText: isObscurePw.value,
+                                      obscureText:
+                                          loginController.getIsPwObscure(),
                                       suffixIcon: IconButton(
-                                        onPressed: () {
-                                          isObscurePw.value =
-                                              !(isObscurePw.value);
-                                        },
+                                        onPressed: () =>
+                                            loginController.toggleObscurePw(),
                                         icon: Icon(
-                                          isObscurePw.value
+                                          loginController.getIsPwObscure()
                                               ? Icons.visibility
                                               : Icons.visibility_off,
                                         ),
@@ -122,7 +129,7 @@ class LoginScreen extends StatelessWidget {
                             CustomAccentButton(
                               buttonLabel: 'Login',
                               onPressed: () {
-                                Navigator.pushNamed(context, '/home');
+                                loginController.signIn();
                               },
                             ),
                             const SizedBox(
@@ -139,11 +146,13 @@ class LoginScreen extends StatelessWidget {
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
+                                    horizontal: 10,
+                                  ),
                                   child: Text(
                                     'or Register New Account',
                                     style: captionSemiboldPoppins.copyWith(
-                                        color: lightNeutralColor),
+                                      color: lightNeutralColor,
+                                    ),
                                   ),
                                 ),
                                 const Expanded(

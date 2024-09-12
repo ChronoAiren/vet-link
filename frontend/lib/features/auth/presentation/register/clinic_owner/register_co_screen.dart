@@ -2,6 +2,7 @@ import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/custom_accent_button.dart';
 import 'package:frontend/common/widgets/custom_primary_button.dart';
+import 'package:frontend/features/auth/presentation/register/clinic_owner/register_co_controller.dart';
 import 'package:frontend/features/auth/presentation/register/clinic_owner/widgets/clinic_form.dart';
 import 'package:frontend/features/auth/presentation/register/clinic_owner/widgets/register_form.dart';
 import 'package:frontend/styles/light_theme.dart';
@@ -11,21 +12,7 @@ import 'package:get/get.dart';
 class RegisterClinicOwnerScreen extends StatelessWidget {
   RegisterClinicOwnerScreen({super.key});
 
-  final RxInt activeStep = 1.obs;
-
-  void prevStep() {
-    if (activeStep.value > 1) {
-      activeStep.value -= 1;
-    }
-  }
-
-  void nextStep() {
-    if (activeStep.value == 3) {
-      // submit
-    } else {
-      activeStep.value += 1;
-    }
-  }
+  final registerCoController = Get.put(RegisterCOController());
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +43,7 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                   () => SizedBox(
                     height: 100.0,
                     child: EasyStepper(
-                      activeStep: activeStep.value,
+                      activeStep: registerCoController.activeStep.value,
                       borderThickness: 2,
                       finishedStepBorderColor: lightAccentColor,
                       finishedStepTextColor: lightAccentColor,
@@ -92,19 +79,35 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                           children: [
                             Obx(
                               () => Visibility(
-                                visible: activeStep.value == 1,
-                                child: RegisterForm(),
+                                visible:
+                                    registerCoController.activeStep.value == 1,
+                                child: RegisterForm(
+                                  formKey: registerCoController.registerFormKey,
+                                  firstName: registerCoController.firstName,
+                                  lastName: registerCoController.lastName,
+                                  emailField: registerCoController.emailField,
+                                  passwordField:
+                                      registerCoController.passwordField,
+                                ),
                               ),
                             ),
                             Obx(
                               () => Visibility(
-                                visible: activeStep.value == 2,
-                                child: const ClinicForm(),
+                                visible:
+                                    registerCoController.activeStep.value == 2,
+                                child: ClinicForm(
+                                  formKey: registerCoController.clinicFormKey,
+                                  nameField: registerCoController.nameField,
+                                  locationField:
+                                      registerCoController.locationField,
+                                  permitField: registerCoController.permitField,
+                                ),
                               ),
                             ),
                             Obx(
                               () => Visibility(
-                                visible: activeStep.value == 3,
+                                visible:
+                                    registerCoController.activeStep.value == 3,
                                 child: const Padding(
                                   padding: EdgeInsets.only(bottom: 30.0),
                                   child: Column(
@@ -192,8 +195,11 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                                   child: Obx(
                                     () => CustomPrimaryButton(
                                       buttonLabel: 'Prev',
-                                      enabled: activeStep.value != 1,
-                                      onPressed: () => prevStep(),
+                                      enabled: registerCoController
+                                              .activeStep.value !=
+                                          1,
+                                      onPressed: () =>
+                                          registerCoController.prevStep(),
                                     ),
                                   ),
                                 ),
@@ -203,10 +209,13 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                                 Expanded(
                                   child: Obx(
                                     () => CustomAccentButton(
-                                      buttonLabel: activeStep.value == 3
+                                      buttonLabel: registerCoController
+                                                  .activeStep.value ==
+                                              3
                                           ? 'Submit'
                                           : 'Next',
-                                      onPressed: () => nextStep(),
+                                      onPressed: () =>
+                                          registerCoController.nextStep(),
                                     ),
                                   ),
                                 ),
@@ -217,7 +226,8 @@ class RegisterClinicOwnerScreen extends StatelessWidget {
                             ),
                             Obx(
                               () => Visibility(
-                                visible: activeStep.value == 1,
+                                visible:
+                                    registerCoController.activeStep.value == 1,
                                 child: Column(
                                   children: [
                                     const SizedBox(

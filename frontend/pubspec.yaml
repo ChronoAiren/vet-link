@@ -11,18 +11,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
+  intl: ^0.17.0  # Add this line for the intl package
 
   cupertino_icons: ^1.0.2
   get: ^4.6.6
   flutter_svg: ^2.0.10+1
   easy_stepper: ^0.8.5+1
   responsive_framework: ^1.4.0
+  dio: ^5.5.0+1
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^2.0.0
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  build_runner: ^2.4.9
 
 flutter:
   uses-material-design: true

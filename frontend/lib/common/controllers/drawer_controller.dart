@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:frontend/common/constants/nav_items.dart';
+import 'package:frontend/common/controllers/session_controller.dart';
 import 'package:get/get.dart';
 
 class CustomDrawerController extends GetxController {
   final List<Map<String, dynamic>> _navItems = [...navigationItems];
+  final SessionController sessionController = Get.find();
 
   final RxString activeRoute = '/home'.obs;
   final RxBool isMobileDrawerOpened = false.obs;
@@ -14,11 +16,7 @@ class CustomDrawerController extends GetxController {
 
   bool isDrawerOpen() => isMobileDrawerOpened.value;
 
-  loadCurrentRoute() {
-    final String initialRoute = Get.currentRoute;
-    activeRoute.value = initialRoute.isNotEmpty ? initialRoute : '/home';
-    debugPrint(initialRoute);
-  }
+  void setActiveRoute(String route) => activeRoute.value = route;
 
   void goTo(String route) {
     if (kIsWeb) {
@@ -40,5 +38,10 @@ class CustomDrawerController extends GetxController {
     if (!kIsWeb && isMobileDrawerOpened.value) {
       isMobileDrawerOpened.value == false;
     }
+  }
+
+  void logout() {
+    sessionController.resetCurrentUser();
+    Get.offAndToNamed('/login');
   }
 }

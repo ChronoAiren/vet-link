@@ -40,7 +40,7 @@ const List<Map<String, dynamic>> navigationItems = [
   {
     'icon': Icons.pets,
     'title': 'Pets',
-    'route': '/book_appointment',
+    'route': '/view_pets',
     'visibleTo': ['petOwner']
   }
 ];
