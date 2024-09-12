@@ -8,15 +8,21 @@ import (
 type MethodFunc func(path string, mainFn HandlerFunc)
 
 func (f *Framework) Mux() struct {
-	Get  MethodFunc
-	Post MethodFunc
+	Get    MethodFunc
+	Post   MethodFunc
+	Delete MethodFunc
+	Patch  MethodFunc
 } {
 	return struct {
-		Get  MethodFunc
-		Post MethodFunc
+		Get    MethodFunc
+		Post   MethodFunc
+		Delete MethodFunc
+		Patch  MethodFunc
 	}{
-		Get:  f.get,
-		Post: f.post,
+		Get:    f.get,
+		Post:   f.post,
+		Delete: f.delete,
+		Patch:  f.patch,
 	}
 }
 
@@ -49,4 +55,12 @@ func (f *Framework) get(path string, mainFn HandlerFunc) {
 
 func (f *Framework) post(path string, mainFn HandlerFunc) {
 	runMethod(f.Api.POST, path, mainFn)
+}
+
+func (f *Framework) delete(path string, mainFn HandlerFunc) {
+	runMethod(f.Api.DELETE, path, mainFn)
+}
+
+func (f *Framework) patch(path string, mainFn HandlerFunc) {
+	runMethod(f.Api.PATCH, path, mainFn)
 }

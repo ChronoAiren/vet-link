@@ -2,9 +2,13 @@ package main
 
 import (
 	"backend/framework"
+	"backend/services/pets"
+	"backend/services/users"
+	"backend/services/users/employees"
+	"backend/services/users/employees/receptionist"
+	"backend/services/users/employees/veterinarian"
 	"backend/services/users/owners/clinicowners"
 	"backend/services/users/owners/petowners"
-	"backend/services/users/users"
 	"backend/store"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
@@ -23,9 +27,16 @@ func run() (err error) {
 	f := framework.New(echo.New(), *d)
 	f.Api.Use(middleware.CORS())
 	f.RegisterServices(
+		// User-related services
 		users.New(),
 		petowners.New(),
 		clinicowners.New(),
+		// Staff-related services
+		employees.New(),
+		receptionist.New(),
+		veterinarian.New(),
+		// Pet-related services
+		pets.New(),
 	)
 	f.Api.GET("/test", func(c echo.Context) error {
 		return c.String(200, "Hello, World!")

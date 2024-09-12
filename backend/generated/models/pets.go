@@ -8,7 +8,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
@@ -24,12 +23,12 @@ import (
 
 // Pet is an object representing the database table.
 type Pet struct {
-	ID        uint32    `db:"id,pk,autoincr" `
-	Name      string    `db:"name" `
-	Gender    uint8     `db:"gender" `
-	Birthdate time.Time `db:"birthdate" `
-	BreedID   uint32    `db:"breed_id" `
-	OwnerID   uint32    `db:"owner_id" `
+	ID        uint32 `db:"id,pk,autoincr" `
+	Name      string `db:"name" `
+	Gender    uint8  `db:"gender" `
+	Birthdate string `db:"birthdate" `
+	BreedID   uint32 `db:"breed_id" `
+	OwnerID   uint32 `db:"owner_id" `
 
 	R petR `db:"-" `
 }
@@ -57,12 +56,12 @@ type petR struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type PetSetter struct {
-	ID        omit.Val[uint32]    `db:"id,pk,autoincr" `
-	Name      omit.Val[string]    `db:"name" `
-	Gender    omit.Val[uint8]     `db:"gender" `
-	Birthdate omit.Val[time.Time] `db:"birthdate" `
-	BreedID   omit.Val[uint32]    `db:"breed_id" `
-	OwnerID   omit.Val[uint32]    `db:"owner_id" `
+	ID        omit.Val[uint32] `db:"id,pk,autoincr" `
+	Name      omit.Val[string] `db:"name" `
+	Gender    omit.Val[uint8]  `db:"gender" `
+	Birthdate omit.Val[string] `db:"birthdate" `
+	BreedID   omit.Val[uint32] `db:"breed_id" `
+	OwnerID   omit.Val[uint32] `db:"owner_id" `
 }
 
 func (s PetSetter) SetColumns() []string {
@@ -253,7 +252,7 @@ type petWhere[Q mysql.Filterable] struct {
 	ID        mysql.WhereMod[Q, uint32]
 	Name      mysql.WhereMod[Q, string]
 	Gender    mysql.WhereMod[Q, uint8]
-	Birthdate mysql.WhereMod[Q, time.Time]
+	Birthdate mysql.WhereMod[Q, string]
 	BreedID   mysql.WhereMod[Q, uint32]
 	OwnerID   mysql.WhereMod[Q, uint32]
 }
@@ -267,7 +266,7 @@ func buildPetWhere[Q mysql.Filterable](cols petColumns) petWhere[Q] {
 		ID:        mysql.Where[Q, uint32](cols.ID),
 		Name:      mysql.Where[Q, string](cols.Name),
 		Gender:    mysql.Where[Q, uint8](cols.Gender),
-		Birthdate: mysql.Where[Q, time.Time](cols.Birthdate),
+		Birthdate: mysql.Where[Q, string](cols.Birthdate),
 		BreedID:   mysql.Where[Q, uint32](cols.BreedID),
 		OwnerID:   mysql.Where[Q, uint32](cols.OwnerID),
 	}

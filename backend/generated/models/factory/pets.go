@@ -6,7 +6,6 @@ package factory
 import (
 	"context"
 	"testing"
-	"time"
 
 	models "backend/generated/models"
 	"github.com/aarondl/opt/omit"
@@ -38,7 +37,7 @@ type PetTemplate struct {
 	ID        func() uint32
 	Name      func() string
 	Gender    func() uint8
-	Birthdate func() time.Time
+	Birthdate func() string
 	BreedID   func() uint32
 	OwnerID   func() uint32
 
@@ -189,7 +188,7 @@ func ensureCreatablePet(m *models.PetSetter) {
 		m.Name = omit.From(random_string(nil))
 	}
 	if m.Birthdate.IsUnset() {
-		m.Birthdate = omit.From(random_time_Time(nil))
+		m.Birthdate = omit.From(random_string(nil))
 	}
 	if m.BreedID.IsUnset() {
 		m.BreedID = omit.From(random_uint32(nil))
@@ -450,14 +449,14 @@ func (m petMods) RandomGender(f *faker.Faker) PetMod {
 }
 
 // Set the model columns to this value
-func (m petMods) Birthdate(val time.Time) PetMod {
+func (m petMods) Birthdate(val string) PetMod {
 	return PetModFunc(func(o *PetTemplate) {
-		o.Birthdate = func() time.Time { return val }
+		o.Birthdate = func() string { return val }
 	})
 }
 
 // Set the Column from the function
-func (m petMods) BirthdateFunc(f func() time.Time) PetMod {
+func (m petMods) BirthdateFunc(f func() string) PetMod {
 	return PetModFunc(func(o *PetTemplate) {
 		o.Birthdate = f
 	})
@@ -474,8 +473,8 @@ func (m petMods) UnsetBirthdate() PetMod {
 // if faker is nil, a default faker is used
 func (m petMods) RandomBirthdate(f *faker.Faker) PetMod {
 	return PetModFunc(func(o *PetTemplate) {
-		o.Birthdate = func() time.Time {
-			return random_time_Time(f)
+		o.Birthdate = func() string {
+			return random_string(f)
 		}
 	})
 }

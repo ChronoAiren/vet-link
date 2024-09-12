@@ -45,9 +45,14 @@ type ClinicTemplate struct {
 }
 
 type clinicR struct {
-	User *clinicRUserR
+	Employees []*clinicREmployeesR
+	User      *clinicRUserR
 }
 
+type clinicREmployeesR struct {
+	number int
+	o      *EmployeeTemplate
+}
 type clinicRUserR struct {
 	o *UserTemplate
 }
@@ -98,6 +103,19 @@ func (o ClinicTemplate) toModels(number int) models.ClinicSlice {
 // setModelRels creates and sets the relationships on *models.Clinic
 // according to the relationships in the template. Nothing is inserted into the db
 func (t ClinicTemplate) setModelRels(o *models.Clinic) {
+	if t.r.Employees != nil {
+		rel := models.EmployeeSlice{}
+		for _, r := range t.r.Employees {
+			related := r.o.toModels(r.number)
+			for _, rel := range related {
+				rel.ClinicID = o.ID
+				rel.R.Clinic = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Employees = rel
+	}
+
 	if t.r.User != nil {
 		rel := t.r.User.o.toModel()
 		rel.R.Clinics = append(rel.R.Clinics, o)
@@ -186,6 +204,21 @@ func ensureCreatableClinic(m *models.ClinicSetter) {
 func (o *ClinicTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.Clinic) (context.Context, error) {
 	var err error
 
+	if o.r.Employees != nil {
+		for _, r := range o.r.Employees {
+			var rel0 models.EmployeeSlice
+			ctx, rel0, err = r.o.createMany(ctx, exec, r.number)
+			if err != nil {
+				return ctx, err
+			}
+
+			err = m.AttachEmployees(ctx, exec, rel0...)
+			if err != nil {
+				return ctx, err
+			}
+		}
+	}
+
 	return ctx, err
 }
 
@@ -228,21 +261,21 @@ func (o *ClinicTemplate) create(ctx context.Context, exec bob.Executor) (context
 	opt := o.BuildSetter()
 	ensureCreatableClinic(opt)
 
-	var rel0 *models.User
+	var rel1 *models.User
 	if o.r.User == nil {
 		var ok bool
-		rel0, ok = userCtx.Value(ctx)
+		rel1, ok = userCtx.Value(ctx)
 		if !ok {
 			ClinicMods.WithNewUser().Apply(o)
 		}
 	}
 	if o.r.User != nil {
-		ctx, rel0, err = o.r.User.o.create(ctx, exec)
+		ctx, rel1, err = o.r.User.o.create(ctx, exec)
 		if err != nil {
 			return ctx, nil, err
 		}
 	}
-	opt.UserID = omit.From(rel0.ID)
+	opt.UserID = omit.From(rel1.ID)
 
 	m, err := models.Clinics.Insert(ctx, exec, opt)
 	if err != nil {
@@ -250,7 +283,7 @@ func (o *ClinicTemplate) create(ctx context.Context, exec bob.Executor) (context
 	}
 	ctx = clinicCtx.WithValue(ctx, m)
 
-	m.R.User = rel0
+	m.R.User = rel1
 
 	ctx, err = o.insertOptRels(ctx, exec, m)
 	return ctx, m, err
@@ -493,5 +526,43 @@ func (m clinicMods) WithNewUser(mods ...UserMod) ClinicMod {
 func (m clinicMods) WithoutUser() ClinicMod {
 	return ClinicModFunc(func(o *ClinicTemplate) {
 		o.r.User = nil
+	})
+}
+
+func (m clinicMods) WithEmployees(number int, related *EmployeeTemplate) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		o.r.Employees = []*clinicREmployeesR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m clinicMods) WithNewEmployees(number int, mods ...EmployeeMod) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		related := o.f.NewEmployee(mods...)
+		m.WithEmployees(number, related).Apply(o)
+	})
+}
+
+func (m clinicMods) AddEmployees(number int, related *EmployeeTemplate) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		o.r.Employees = append(o.r.Employees, &clinicREmployeesR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m clinicMods) AddNewEmployees(number int, mods ...EmployeeMod) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		related := o.f.NewEmployee(mods...)
+		m.AddEmployees(number, related).Apply(o)
+	})
+}
+
+func (m clinicMods) WithoutEmployees() ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		o.r.Employees = nil
 	})
 }

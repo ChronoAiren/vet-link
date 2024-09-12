@@ -1,4 +1,4 @@
-package clinicowners
+package employees
 
 import (
 	"backend/framework"
@@ -18,8 +18,6 @@ func (s *Service) Inject(db *store.Store, f *framework.Framework) {
 }
 
 func (s *Service) Serve(f *framework.Framework) {
-	f.Mux().Get("/clinic-owners", s.handleReadAll)
-	f.Mux().Get("/clinic-owners/:id", s.handleRead)
-	f.Mux().Post("/clinic-owners", s.handleCreate)
-	f.Mux().Post("/clinic-owners/:id/verify", s.handleVerify)
+	f.Mux().Get("/employees/:clinicId", s.handleReadAll)
+	f.Mux().Post("/employees/:type", s.handleCreate)
 }

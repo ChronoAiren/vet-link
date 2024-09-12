@@ -4,12 +4,13 @@
 package factory
 
 type Factory struct {
-	baseBreedMods  BreedModSlice
-	baseClinicMods ClinicModSlice
-	basePetMods    PetModSlice
-	baseRoleMods   RoleModSlice
-	baseSpecyMods  SpecyModSlice
-	baseUserMods   UserModSlice
+	baseBreedMods    BreedModSlice
+	baseClinicMods   ClinicModSlice
+	baseEmployeeMods EmployeeModSlice
+	basePetMods      PetModSlice
+	baseRoleMods     RoleModSlice
+	baseSpecyMods    SpecyModSlice
+	baseUserMods     UserModSlice
 }
 
 func New() *Factory {
@@ -36,6 +37,18 @@ func (f *Factory) NewClinic(mods ...ClinicMod) *ClinicTemplate {
 	}
 
 	ClinicModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewEmployee(mods ...EmployeeMod) *EmployeeTemplate {
+	o := &EmployeeTemplate{f: f}
+
+	if f != nil {
+		f.baseEmployeeMods.Apply(o)
+	}
+
+	EmployeeModSlice(mods).Apply(o)
 
 	return o
 }
@@ -102,6 +115,14 @@ func (f *Factory) ClearBaseClinicMods() {
 
 func (f *Factory) AddBaseClinicMod(mods ...ClinicMod) {
 	f.baseClinicMods = append(f.baseClinicMods, mods...)
+}
+
+func (f *Factory) ClearBaseEmployeeMods() {
+	f.baseEmployeeMods = nil
+}
+
+func (f *Factory) AddBaseEmployeeMod(mods ...EmployeeMod) {
+	f.baseEmployeeMods = append(f.baseEmployeeMods, mods...)
 }
 
 func (f *Factory) ClearBasePetMods() {

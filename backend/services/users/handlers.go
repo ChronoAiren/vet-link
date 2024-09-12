@@ -2,12 +2,15 @@ package users
 
 import (
 	my "backend/framework"
-	. "backend/generated/models"
+	"backend/generated/models"
 	"github.com/stephenafamo/bob"
 )
 
 func (s *Service) handleReadAll(c *my.Context, data my.ResultChan, err my.ErrorChan) {
-	if users, e := Users.Query(c.GetContext(), s.Store.Db, PreloadUserRole()).All(); e != nil {
+	if users, e := models.Users.Query(
+		c.GetContext(), s.Store.Db,
+		models.PreloadUserRole(),
+	).All(); e != nil {
 		err <- e
 	} else {
 		var dtoSlice []UserResponse
@@ -44,11 +47,11 @@ func (s *Service) handleLogin(c *my.Context, data my.ResultChan, err my.ErrorCha
 	req := new(LoginRequest)
 	if e := c.Api.Bind(req); e != nil {
 		err <- e
-	} else if user, e := Users.Query(
+	} else if user, e := models.Users.Query(
 		c.GetContext(), s.Store.Db,
-		SelectWhere.Users.Email.EQ(req.Email),
-		SelectWhere.Users.Password.EQ(req.Password),
-		PreloadUserRole(),
+		models.SelectWhere.Users.Email.EQ(req.Email),
+		models.SelectWhere.Users.Password.EQ(req.Password),
+		models.PreloadUserRole(),
 	).One(); e != nil {
 		err <- e
 	} else if user != nil {

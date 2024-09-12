@@ -13,28 +13,31 @@ import (
 )
 
 var TableNames = struct {
-	Breeds  string
-	Clinics string
-	Pets    string
-	Roles   string
-	Species string
-	Users   string
+	Breeds    string
+	Clinics   string
+	Employees string
+	Pets      string
+	Roles     string
+	Species   string
+	Users     string
 }{
-	Breeds:  "breeds",
-	Clinics: "clinics",
-	Pets:    "pets",
-	Roles:   "roles",
-	Species: "species",
-	Users:   "users",
+	Breeds:    "breeds",
+	Clinics:   "clinics",
+	Employees: "employees",
+	Pets:      "pets",
+	Roles:     "roles",
+	Species:   "species",
+	Users:     "users",
 }
 
 var ColumnNames = struct {
-	Breeds  breedColumnNames
-	Clinics clinicColumnNames
-	Pets    petColumnNames
-	Roles   roleColumnNames
-	Species specyColumnNames
-	Users   userColumnNames
+	Breeds    breedColumnNames
+	Clinics   clinicColumnNames
+	Employees employeeColumnNames
+	Pets      petColumnNames
+	Roles     roleColumnNames
+	Species   specyColumnNames
+	Users     userColumnNames
 }{
 	Breeds: breedColumnNames{
 		ID:          "id",
@@ -47,6 +50,11 @@ var ColumnNames = struct {
 		Name:       "name",
 		Location:   "location",
 		BusinessNo: "business_no",
+	},
+	Employees: employeeColumnNames{
+		ID:       "id",
+		UserID:   "user_id",
+		ClinicID: "clinic_id",
 	},
 	Pets: petColumnNames{
 		ID:        "id",
@@ -81,27 +89,30 @@ var (
 )
 
 func Where[Q mysql.Filterable]() struct {
-	Breeds  breedWhere[Q]
-	Clinics clinicWhere[Q]
-	Pets    petWhere[Q]
-	Roles   roleWhere[Q]
-	Species specyWhere[Q]
-	Users   userWhere[Q]
+	Breeds    breedWhere[Q]
+	Clinics   clinicWhere[Q]
+	Employees employeeWhere[Q]
+	Pets      petWhere[Q]
+	Roles     roleWhere[Q]
+	Species   specyWhere[Q]
+	Users     userWhere[Q]
 } {
 	return struct {
-		Breeds  breedWhere[Q]
-		Clinics clinicWhere[Q]
-		Pets    petWhere[Q]
-		Roles   roleWhere[Q]
-		Species specyWhere[Q]
-		Users   userWhere[Q]
+		Breeds    breedWhere[Q]
+		Clinics   clinicWhere[Q]
+		Employees employeeWhere[Q]
+		Pets      petWhere[Q]
+		Roles     roleWhere[Q]
+		Species   specyWhere[Q]
+		Users     userWhere[Q]
 	}{
-		Breeds:  buildBreedWhere[Q](BreedColumns),
-		Clinics: buildClinicWhere[Q](ClinicColumns),
-		Pets:    buildPetWhere[Q](PetColumns),
-		Roles:   buildRoleWhere[Q](RoleColumns),
-		Species: buildSpecyWhere[Q](SpecyColumns),
-		Users:   buildUserWhere[Q](UserColumns),
+		Breeds:    buildBreedWhere[Q](BreedColumns),
+		Clinics:   buildClinicWhere[Q](ClinicColumns),
+		Employees: buildEmployeeWhere[Q](EmployeeColumns),
+		Pets:      buildPetWhere[Q](PetColumns),
+		Roles:     buildRoleWhere[Q](RoleColumns),
+		Species:   buildSpecyWhere[Q](SpecyColumns),
+		Users:     buildUserWhere[Q](UserColumns),
 	}
 }
 
@@ -126,11 +137,12 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 }
 
 type joins[Q dialect.Joinable] struct {
-	Breeds  joinSet[breedJoins[Q]]
-	Clinics joinSet[clinicJoins[Q]]
-	Pets    joinSet[petJoins[Q]]
-	Roles   joinSet[roleJoins[Q]]
-	Users   joinSet[userJoins[Q]]
+	Breeds    joinSet[breedJoins[Q]]
+	Clinics   joinSet[clinicJoins[Q]]
+	Employees joinSet[employeeJoins[Q]]
+	Pets      joinSet[petJoins[Q]]
+	Roles     joinSet[roleJoins[Q]]
+	Users     joinSet[userJoins[Q]]
 }
 
 func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q](c C, f F) joinSet[Q] {
@@ -143,11 +155,12 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
-		Breeds:  buildJoinSet[breedJoins[Q]](BreedColumns, buildBreedJoins),
-		Clinics: buildJoinSet[clinicJoins[Q]](ClinicColumns, buildClinicJoins),
-		Pets:    buildJoinSet[petJoins[Q]](PetColumns, buildPetJoins),
-		Roles:   buildJoinSet[roleJoins[Q]](RoleColumns, buildRoleJoins),
-		Users:   buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
+		Breeds:    buildJoinSet[breedJoins[Q]](BreedColumns, buildBreedJoins),
+		Clinics:   buildJoinSet[clinicJoins[Q]](ClinicColumns, buildClinicJoins),
+		Employees: buildJoinSet[employeeJoins[Q]](EmployeeColumns, buildEmployeeJoins),
+		Pets:      buildJoinSet[petJoins[Q]](PetColumns, buildPetJoins),
+		Roles:     buildJoinSet[roleJoins[Q]](RoleColumns, buildRoleJoins),
+		Users:     buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
 	}
 }
 

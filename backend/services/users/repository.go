@@ -2,7 +2,7 @@ package users
 
 import (
 	my "backend/framework"
-	. "backend/generated/models"
+	"backend/generated/models"
 	g "backend/globals"
 	"backend/store"
 	"github.com/aarondl/opt/omit"
@@ -10,15 +10,15 @@ import (
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
 )
 
-func ListUsers(c *my.Context, s *store.Store, args ...bob.Mod[*dialect.SelectQuery]) (UserSlice, error) {
-	return Users.Query(c.GetContext(), s.Db,
-		append(args, PreloadUserRole())...,
+func ListUsers(c *my.Context, s *store.Store, args ...bob.Mod[*dialect.SelectQuery]) (models.UserSlice, error) {
+	return models.Users.Query(c.GetContext(), s.Db,
+		append(args, models.PreloadUserRole())...,
 	).All()
 }
 
 func InsertUser(c *my.Context, exec bob.Executor, req InsertUserRequest) (*UserResponse, error) {
 	params := req.GetInsertUserParams()
-	if inserted, e := Users.Insert(c.GetContext(), exec, &UserSetter{
+	if inserted, e := models.Users.Insert(c.GetContext(), exec, &models.UserSetter{
 		GivenName:  omit.From(params.GivenName),
 		FamilyName: omit.From(params.FamilyName),
 		Email:      omit.From(params.Email),
@@ -26,10 +26,10 @@ func InsertUser(c *my.Context, exec bob.Executor, req InsertUserRequest) (*UserR
 		RoleID:     omit.From(params.RoleID),
 	}); e != nil {
 		return nil, e
-	} else if retrieved, e := Users.Query(
+	} else if retrieved, e := models.Users.Query(
 		c.GetContext(), exec,
-		SelectWhere.Users.Email.EQ(inserted.Email),
-		PreloadUserRole(),
+		models.SelectWhere.Users.Email.EQ(inserted.Email),
+		models.PreloadUserRole(),
 	).One(); e != nil {
 		return nil, e
 	} else {

@@ -47,7 +47,8 @@ type ClinicsStmt = bob.QueryStmt[*Clinic, ClinicSlice]
 
 // clinicR is where relationships are stored.
 type clinicR struct {
-	User *User // fk_user_clinics_clinics_user_id
+	Employees EmployeeSlice // fk_employees_clinics_clinic_id
+	User      *User         // fk_user_clinics_clinics_user_id
 }
 
 // ClinicSetter is used for insert/upsert/update operations
@@ -245,8 +246,9 @@ func buildClinicWhere[Q mysql.Filterable](cols clinicColumns) clinicWhere[Q] {
 }
 
 type clinicJoins[Q dialect.Joinable] struct {
-	typ  string
-	User func(context.Context) modAs[Q, userColumns]
+	typ       string
+	Employees func(context.Context) modAs[Q, employeeColumns]
+	User      func(context.Context) modAs[Q, userColumns]
 }
 
 func (j clinicJoins[Q]) aliasedAs(alias string) clinicJoins[Q] {
@@ -255,8 +257,9 @@ func (j clinicJoins[Q]) aliasedAs(alias string) clinicJoins[Q] {
 
 func buildClinicJoins[Q dialect.Joinable](cols clinicColumns, typ string) clinicJoins[Q] {
 	return clinicJoins[Q]{
-		typ:  typ,
-		User: clinicsJoinUser[Q](cols, typ),
+		typ:       typ,
+		Employees: clinicsJoinEmployees[Q](cols, typ),
+		User:      clinicsJoinUser[Q](cols, typ),
 	}
 }
 
@@ -355,6 +358,25 @@ func (o ClinicSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
+func clinicsJoinEmployees[Q dialect.Joinable](from clinicColumns, typ string) func(context.Context) modAs[Q, employeeColumns] {
+	return func(ctx context.Context) modAs[Q, employeeColumns] {
+		return modAs[Q, employeeColumns]{
+			c: EmployeeColumns,
+			f: func(to employeeColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Employees.Name(ctx).As(to.Alias())).On(
+						to.ClinicID.EQ(from.ID),
+					))
+				}
+
+				return mods
+			},
+		}
+	}
+}
+
 func clinicsJoinUser[Q dialect.Joinable](from clinicColumns, typ string) func(context.Context) modAs[Q, userColumns] {
 	return func(ctx context.Context) modAs[Q, userColumns] {
 		return modAs[Q, userColumns]{
@@ -372,6 +394,24 @@ func clinicsJoinUser[Q dialect.Joinable](from clinicColumns, typ string) func(co
 			},
 		}
 	}
+}
+
+// Employees starts a query for related objects on employees
+func (o *Clinic) Employees(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) EmployeesQuery {
+	return Employees.Query(ctx, exec, append(mods,
+		sm.Where(EmployeeColumns.ClinicID.EQ(mysql.Arg(o.ID))),
+	)...)
+}
+
+func (os ClinicSlice) Employees(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) EmployeesQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = mysql.ArgGroup(o.ID)
+	}
+
+	return Employees.Query(ctx, exec, append(mods,
+		sm.Where(mysql.Group(EmployeeColumns.ClinicID).In(PKArgs...)),
+	)...)
 }
 
 // User starts a query for related objects on users
@@ -398,7 +438,21 @@ func (o *Clinic) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "Owner":
+	case "Employees":
+		rels, ok := retrieved.(EmployeeSlice)
+		if !ok {
+			return fmt.Errorf("clinic cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Employees = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Clinic = o
+			}
+		}
+		return nil
+	case "User":
 		rel, ok := retrieved.(*User)
 		if !ok {
 			return fmt.Errorf("clinic cannot load %T as %q", retrieved, name)
@@ -415,9 +469,81 @@ func (o *Clinic) Preload(name string, retrieved any) error {
 	}
 }
 
+func ThenLoadClinicEmployees(queryMods ...bob.Mod[*dialect.SelectQuery]) mysql.Loader {
+	return mysql.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadClinicEmployees(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load ClinicEmployees", retrieved)
+		}
+
+		err := loader.LoadClinicEmployees(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadClinicEmployees loads the clinic's Employees into the .R struct
+func (o *Clinic) LoadClinicEmployees(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Employees = nil
+
+	related, err := o.Employees(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Clinic = o
+	}
+
+	o.R.Employees = related
+	return nil
+}
+
+// LoadClinicEmployees loads the clinic's Employees into the .R struct
+func (os ClinicSlice) LoadClinicEmployees(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	employees, err := os.Employees(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.Employees = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range employees {
+			if o.ID != rel.ClinicID {
+				continue
+			}
+
+			rel.R.Clinic = o
+
+			o.R.Employees = append(o.R.Employees, rel)
+		}
+	}
+
+	return nil
+}
+
 func PreloadClinicUser(opts ...mysql.PreloadOption) mysql.Preloader {
 	return mysql.Preload[*User, UserSlice](orm.Relationship{
-		Name: "Owner",
+		Name: "User",
 		Sides: []orm.RelSide{
 			{
 				From: "clinics",
@@ -498,6 +624,72 @@ func (os ClinicSlice) LoadClinicUser(ctx context.Context, exec bob.Executor, mod
 			o.R.User = rel
 			break
 		}
+	}
+
+	return nil
+}
+
+func insertClinicEmployees0(ctx context.Context, exec bob.Executor, employees1 []*EmployeeSetter, clinic0 *Clinic) (EmployeeSlice, error) {
+	for i := range employees1 {
+		employees1[i].ClinicID = omit.From(clinic0.ID)
+	}
+
+	ret, err := Employees.InsertMany(ctx, exec, employees1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertClinicEmployees0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachClinicEmployees0(ctx context.Context, exec bob.Executor, count int, employees1 EmployeeSlice, clinic0 *Clinic) (EmployeeSlice, error) {
+	setter := &EmployeeSetter{
+		ClinicID: omit.From(clinic0.ID),
+	}
+
+	err := Employees.Update(ctx, exec, setter, employees1...)
+	if err != nil {
+		return nil, fmt.Errorf("attachClinicEmployees0: %w", err)
+	}
+
+	return employees1, nil
+}
+
+func (clinic0 *Clinic) InsertEmployees(ctx context.Context, exec bob.Executor, related ...*EmployeeSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	employees1, err := insertClinicEmployees0(ctx, exec, related, clinic0)
+	if err != nil {
+		return err
+	}
+
+	clinic0.R.Employees = append(clinic0.R.Employees, employees1...)
+
+	for _, rel := range employees1 {
+		rel.R.Clinic = clinic0
+	}
+	return nil
+}
+
+func (clinic0 *Clinic) AttachEmployees(ctx context.Context, exec bob.Executor, related ...*Employee) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	employees1 := EmployeeSlice(related)
+
+	_, err = attachClinicEmployees0(ctx, exec, len(related), employees1, clinic0)
+	if err != nil {
+		return err
+	}
+
+	clinic0.R.Employees = append(clinic0.R.Employees, employees1...)
+
+	for _, rel := range related {
+		rel.R.Clinic = clinic0
 	}
 
 	return nil

@@ -2,9 +2,9 @@ package clinicowners
 
 import (
 	my "backend/framework"
-	. "backend/generated/models"
+	"backend/generated/models"
 	g "backend/globals"
-	"backend/services/users/users"
+	"backend/services/users"
 	"backend/store"
 	"errors"
 	"github.com/aarondl/opt/omit"
@@ -13,12 +13,12 @@ import (
 	"log"
 )
 
-func ListClinics(c *my.Context, s *store.Store, args ...bob.Mod[*dialect.SelectQuery]) (ClinicSlice, error) {
-	return Clinics.Query(c.GetContext(), s.Db,
+func ListClinics(c *my.Context, s *store.Store, args ...bob.Mod[*dialect.SelectQuery]) (models.ClinicSlice, error) {
+	return models.Clinics.Query(c.GetContext(), s.Db,
 		append(
 			args,
-			PreloadClinicUser(),
-			SelectJoins.Clinics.LeftJoin.User(c.GetContext()),
+			models.PreloadClinicUser(),
+			models.SelectJoins.Clinics.LeftJoin.User(c.GetContext()),
 		)...,
 	).All()
 }
@@ -26,16 +26,16 @@ func ListClinics(c *my.Context, s *store.Store, args ...bob.Mod[*dialect.SelectQ
 func InsertClinic(c *my.Context, exec bob.Executor, req *CreateRequest) (clinic *ClinicResponse, err error) {
 	if params, e := req.GetInsertClinicParams(); e != nil {
 		return nil, e
-	} else if inserted, e := Clinics.Insert(c.GetContext(), exec, &ClinicSetter{
+	} else if inserted, e := models.Clinics.Insert(c.GetContext(), exec, &models.ClinicSetter{
 		UserID:     omit.From(params.UserID),
 		Name:       omit.From(params.Name),
 		Location:   omit.From(params.Location),
 		BusinessNo: omit.From(params.BusinessNo),
 	}); e != nil {
 		return nil, e
-	} else if retrieved, e := Clinics.Query(c.GetContext(), exec,
-		SelectWhere.Clinics.ID.EQ(inserted.ID),
-		PreloadClinicUser(),
+	} else if retrieved, e := models.Clinics.Query(c.GetContext(), exec,
+		models.SelectWhere.Clinics.ID.EQ(inserted.ID),
+		models.PreloadClinicUser(),
 	).One(); e != nil {
 		return nil, e
 	} else {
@@ -111,6 +111,6 @@ type ClinicResponse struct {
 	Owner      users.UserResponse `json:"owner,omitempty"`
 }
 
-type VerifyRequest struct {
-	Id uint32 `json:"id" param:"id" query:"id" form:"id"`
+type AccessClinicRequest struct {
+	ID uint32 `json:"id" param:"id" query:"id" form:"id"`
 }

@@ -46,11 +46,16 @@ type UserTemplate struct {
 }
 
 type userR struct {
+	Employees []*userREmployeesR
 	OwnerPets []*userROwnerPetsR
 	Clinics   []*userRClinicsR
 	Role      *userRRoleR
 }
 
+type userREmployeesR struct {
+	number int
+	o      *EmployeeTemplate
+}
 type userROwnerPetsR struct {
 	number int
 	o      *PetTemplate
@@ -112,6 +117,19 @@ func (o UserTemplate) toModels(number int) models.UserSlice {
 // setModelRels creates and sets the relationships on *models.User
 // according to the relationships in the template. Nothing is inserted into the db
 func (t UserTemplate) setModelRels(o *models.User) {
+	if t.r.Employees != nil {
+		rel := models.EmployeeSlice{}
+		for _, r := range t.r.Employees {
+			related := r.o.toModels(r.number)
+			for _, rel := range related {
+				rel.UserID = o.ID
+				rel.R.User = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Employees = rel
+	}
+
 	if t.r.OwnerPets != nil {
 		rel := models.PetSlice{}
 		for _, r := range t.r.OwnerPets {
@@ -232,15 +250,30 @@ func ensureCreatableUser(m *models.UserSetter) {
 func (o *UserTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.User) (context.Context, error) {
 	var err error
 
-	if o.r.OwnerPets != nil {
-		for _, r := range o.r.OwnerPets {
-			var rel0 models.PetSlice
+	if o.r.Employees != nil {
+		for _, r := range o.r.Employees {
+			var rel0 models.EmployeeSlice
 			ctx, rel0, err = r.o.createMany(ctx, exec, r.number)
 			if err != nil {
 				return ctx, err
 			}
 
-			err = m.AttachOwnerPets(ctx, exec, rel0...)
+			err = m.AttachEmployees(ctx, exec, rel0...)
+			if err != nil {
+				return ctx, err
+			}
+		}
+	}
+
+	if o.r.OwnerPets != nil {
+		for _, r := range o.r.OwnerPets {
+			var rel1 models.PetSlice
+			ctx, rel1, err = r.o.createMany(ctx, exec, r.number)
+			if err != nil {
+				return ctx, err
+			}
+
+			err = m.AttachOwnerPets(ctx, exec, rel1...)
 			if err != nil {
 				return ctx, err
 			}
@@ -249,13 +282,13 @@ func (o *UserTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *
 
 	if o.r.Clinics != nil {
 		for _, r := range o.r.Clinics {
-			var rel1 models.ClinicSlice
-			ctx, rel1, err = r.o.createMany(ctx, exec, r.number)
+			var rel2 models.ClinicSlice
+			ctx, rel2, err = r.o.createMany(ctx, exec, r.number)
 			if err != nil {
 				return ctx, err
 			}
 
-			err = m.AttachClinics(ctx, exec, rel1...)
+			err = m.AttachClinics(ctx, exec, rel2...)
 			if err != nil {
 				return ctx, err
 			}
@@ -304,21 +337,21 @@ func (o *UserTemplate) create(ctx context.Context, exec bob.Executor) (context.C
 	opt := o.BuildSetter()
 	ensureCreatableUser(opt)
 
-	var rel2 *models.Role
+	var rel3 *models.Role
 	if o.r.Role == nil {
 		var ok bool
-		rel2, ok = roleCtx.Value(ctx)
+		rel3, ok = roleCtx.Value(ctx)
 		if !ok {
 			UserMods.WithNewRole().Apply(o)
 		}
 	}
 	if o.r.Role != nil {
-		ctx, rel2, err = o.r.Role.o.create(ctx, exec)
+		ctx, rel3, err = o.r.Role.o.create(ctx, exec)
 		if err != nil {
 			return ctx, nil, err
 		}
 	}
-	opt.RoleID = omit.From(rel2.ID)
+	opt.RoleID = omit.From(rel3.ID)
 
 	m, err := models.Users.Insert(ctx, exec, opt)
 	if err != nil {
@@ -326,7 +359,7 @@ func (o *UserTemplate) create(ctx context.Context, exec bob.Executor) (context.C
 	}
 	ctx = userCtx.WithValue(ctx, m)
 
-	m.R.Role = rel2
+	m.R.Role = rel3
 
 	ctx, err = o.insertOptRels(ctx, exec, m)
 	return ctx, m, err
@@ -380,7 +413,7 @@ func (o UserTemplate) createMany(ctx context.Context, exec bob.Executor, number 
 	return ctx, m, nil
 }
 
-// Owner has methods that act as mods for the UserTemplate
+// User has methods that act as mods for the UserTemplate
 var UserMods userMods
 
 type userMods struct{}
@@ -601,6 +634,44 @@ func (m userMods) WithNewRole(mods ...RoleMod) UserMod {
 func (m userMods) WithoutRole() UserMod {
 	return UserModFunc(func(o *UserTemplate) {
 		o.r.Role = nil
+	})
+}
+
+func (m userMods) WithEmployees(number int, related *EmployeeTemplate) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.Employees = []*userREmployeesR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m userMods) WithNewEmployees(number int, mods ...EmployeeMod) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		related := o.f.NewEmployee(mods...)
+		m.WithEmployees(number, related).Apply(o)
+	})
+}
+
+func (m userMods) AddEmployees(number int, related *EmployeeTemplate) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.Employees = append(o.r.Employees, &userREmployeesR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m userMods) AddNewEmployees(number int, mods ...EmployeeMod) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		related := o.f.NewEmployee(mods...)
+		m.AddEmployees(number, related).Apply(o)
+	})
+}
+
+func (m userMods) WithoutEmployees() UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.Employees = nil
 	})
 }
 
