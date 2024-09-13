@@ -5,7 +5,6 @@ import (
 	"backend/generated/models"
 	"backend/globals"
 	"backend/services/users"
-	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"time"
 )
@@ -72,17 +71,7 @@ func (s *Service) handleUpdate(c *framework.Context, data framework.ResultChan, 
 	if e := c.Api.Bind(params); e != nil {
 		err <- e
 	} else if e := s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
-		if pet, e := models.FindPet(c.GetContext(), tx, params.ID); e != nil {
-			return e
-		} else if e = pet.Update(c.GetContext(), tx, &models.PetSetter{
-			Name:      omit.FromPtr(params.Name),
-			Gender:    omit.FromPtr(params.Gender),
-			Birthdate: omit.FromPtr(params.Birthdate),
-			BreedID:   omit.FromPtr(params.BreedID),
-		}); e != nil {
-			return e
-		}
-		return nil
+		return updatePet(c, tx, params)
 	}); e != nil {
 		err <- e
 	} else {

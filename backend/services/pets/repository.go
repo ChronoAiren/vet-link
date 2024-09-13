@@ -11,6 +11,22 @@ import (
 	"time"
 )
 
+func listPets(c *my.Context, exec bob.Executor, args)
+
+func updatePet(c *my.Context, exec bob.Executor, req *updateRequest) error {
+	if pet, e := models.FindPet(c.GetContext(), exec, req.ID); e != nil {
+		return e
+	} else if e = pet.Update(c.GetContext(), exec, &models.PetSetter{
+		Name:      omit.FromPtr(req.Name),
+		Gender:    omit.FromPtr(req.Gender),
+		Birthdate: omit.FromPtr(req.Birthdate),
+		BreedID:   omit.FromPtr(req.BreedID),
+	}); e != nil {
+		return e
+	}
+	return nil
+}
+
 func deletePet(c *my.Context, exec bob.Executor, id uint32) error {
 	ctx := c.GetContext()
 	if pet, e := models.FindPet(ctx, exec, id, models.ColumnNames.Pets.ID); e != nil {
