@@ -25,8 +25,7 @@ mixin _$Pet {
   String get gender => throw _privateConstructorUsedError;
   String get birthdate => throw _privateConstructorUsedError;
   int get age => throw _privateConstructorUsedError;
-  Breed get breeds => throw _privateConstructorUsedError;
-  Species get species => throw _privateConstructorUsedError;
+  Breed get breed => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -44,11 +43,9 @@ abstract class $PetCopyWith<$Res> {
       String gender,
       String birthdate,
       int age,
-      Breed breeds,
-      Species species});
+      Breed breed});
 
-  $BreedCopyWith<$Res> get breeds;
-  $SpeciesCopyWith<$Res> get species;
+  $BreedCopyWith<$Res> get breed;
 }
 
 /// @nodoc
@@ -68,8 +65,7 @@ class _$PetCopyWithImpl<$Res, $Val extends Pet> implements $PetCopyWith<$Res> {
     Object? gender = null,
     Object? birthdate = null,
     Object? age = null,
-    Object? breeds = null,
-    Object? species = null,
+    Object? breed = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -92,30 +88,18 @@ class _$PetCopyWithImpl<$Res, $Val extends Pet> implements $PetCopyWith<$Res> {
           ? _value.age
           : age // ignore: cast_nullable_to_non_nullable
               as int,
-      breeds: null == breeds
-          ? _value.breeds
-          : breeds // ignore: cast_nullable_to_non_nullable
+      breed: null == breed
+          ? _value.breed
+          : breed // ignore: cast_nullable_to_non_nullable
               as Breed,
-      species: null == species
-          ? _value.species
-          : species // ignore: cast_nullable_to_non_nullable
-              as Species,
     ) as $Val);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  $BreedCopyWith<$Res> get breeds {
-    return $BreedCopyWith<$Res>(_value.breeds, (value) {
-      return _then(_value.copyWith(breeds: value) as $Val);
-    });
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  $SpeciesCopyWith<$Res> get species {
-    return $SpeciesCopyWith<$Res>(_value.species, (value) {
-      return _then(_value.copyWith(species: value) as $Val);
+  $BreedCopyWith<$Res> get breed {
+    return $BreedCopyWith<$Res>(_value.breed, (value) {
+      return _then(_value.copyWith(breed: value) as $Val);
     });
   }
 }
@@ -132,13 +116,10 @@ abstract class _$$PetImplCopyWith<$Res> implements $PetCopyWith<$Res> {
       String gender,
       String birthdate,
       int age,
-      Breed breeds,
-      Species species});
+      Breed breed});
 
   @override
-  $BreedCopyWith<$Res> get breeds;
-  @override
-  $SpeciesCopyWith<$Res> get species;
+  $BreedCopyWith<$Res> get breed;
 }
 
 /// @nodoc
@@ -155,8 +136,7 @@ class __$$PetImplCopyWithImpl<$Res> extends _$PetCopyWithImpl<$Res, _$PetImpl>
     Object? gender = null,
     Object? birthdate = null,
     Object? age = null,
-    Object? breeds = null,
-    Object? species = null,
+    Object? breed = null,
   }) {
     return _then(_$PetImpl(
       id: null == id
@@ -179,14 +159,10 @@ class __$$PetImplCopyWithImpl<$Res> extends _$PetCopyWithImpl<$Res, _$PetImpl>
           ? _value.age
           : age // ignore: cast_nullable_to_non_nullable
               as int,
-      breeds: null == breeds
-          ? _value.breeds
-          : breeds // ignore: cast_nullable_to_non_nullable
+      breed: null == breed
+          ? _value.breed
+          : breed // ignore: cast_nullable_to_non_nullable
               as Breed,
-      species: null == species
-          ? _value.species
-          : species // ignore: cast_nullable_to_non_nullable
-              as Species,
     ));
   }
 }
@@ -200,8 +176,7 @@ class _$PetImpl implements _Pet {
       required this.gender,
       required this.birthdate,
       required this.age,
-      required this.breeds,
-      required this.species});
+      required this.breed});
 
   factory _$PetImpl.fromJson(Map<String, dynamic> json) =>
       _$$PetImplFromJson(json);
@@ -217,13 +192,11 @@ class _$PetImpl implements _Pet {
   @override
   final int age;
   @override
-  final Breed breeds;
-  @override
-  final Species species;
+  final Breed breed;
 
   @override
   String toString() {
-    return 'Pet(id: $id, name: $name, gender: $gender, birthdate: $birthdate, age: $age, breeds: $breeds, species: $species)';
+    return 'Pet(id: $id, name: $name, gender: $gender, birthdate: $birthdate, age: $age, breed: $breed)';
   }
 
   @override
@@ -237,14 +210,13 @@ class _$PetImpl implements _Pet {
             (identical(other.birthdate, birthdate) ||
                 other.birthdate == birthdate) &&
             (identical(other.age, age) || other.age == age) &&
-            (identical(other.breeds, breeds) || other.breeds == breeds) &&
-            (identical(other.species, species) || other.species == species));
+            (identical(other.breed, breed) || other.breed == breed));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, name, gender, birthdate, age, breeds, species);
+  int get hashCode =>
+      Object.hash(runtimeType, id, name, gender, birthdate, age, breed);
 
   @JsonKey(ignore: true)
   @override
@@ -267,8 +239,7 @@ abstract class _Pet implements Pet {
       required final String gender,
       required final String birthdate,
       required final int age,
-      required final Breed breeds,
-      required final Species species}) = _$PetImpl;
+      required final Breed breed}) = _$PetImpl;
 
   factory _Pet.fromJson(Map<String, dynamic> json) = _$PetImpl.fromJson;
 
@@ -283,9 +254,7 @@ abstract class _Pet implements Pet {
   @override
   int get age;
   @override
-  Breed get breeds;
-  @override
-  Species get species;
+  Breed get breed;
   @override
   @JsonKey(ignore: true)
   _$$PetImplCopyWith<_$PetImpl> get copyWith =>

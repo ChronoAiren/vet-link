@@ -17,6 +17,9 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    loginController.emailField.text = "p@o.ph";
+    loginController.passwordField.text = "123";
+
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(

@@ -5,7 +5,7 @@ class DioClient {
 
   DioClient() {
     _dio
-      ..options.baseUrl = 'http://192.168.254.107:1323/'
+      ..options.baseUrl = 'http://192.168.254.118:1323/'
       ..options.responseType = ResponseType.json;
   }
 

@@ -56,6 +56,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
               setState(() {
                 selectedItem = newValue;
               });
+              widget.controller?.text = newValue ?? "";
             }
           : null,
       validator: widget.validator,

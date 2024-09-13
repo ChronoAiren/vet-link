@@ -12,8 +12,7 @@ _$PetImpl _$$PetImplFromJson(Map<String, dynamic> json) => _$PetImpl(
       gender: json['gender'] as String,
       birthdate: json['birthdate'] as String,
       age: (json['age'] as num).toInt(),
-      breeds: Breed.fromJson(json['breeds'] as Map<String, dynamic>),
-      species: Species.fromJson(json['species'] as Map<String, dynamic>),
+      breed: Breed.fromJson(json['breed'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$PetImplToJson(_$PetImpl instance) => <String, dynamic>{
@@ -22,6 +21,5 @@ Map<String, dynamic> _$$PetImplToJson(_$PetImpl instance) => <String, dynamic>{
       'gender': instance.gender,
       'birthdate': instance.birthdate,
       'age': instance.age,
-      'breeds': instance.breeds,
-      'species': instance.species,
+      'breed': instance.breed,
     };

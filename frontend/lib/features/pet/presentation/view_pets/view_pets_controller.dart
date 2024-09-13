@@ -11,6 +11,12 @@ class ViewPetsController extends GetxController {
   final RxBool isLoading = true.obs;
   RxList<Pet> pets = RxList.empty(growable: true);
 
+  @override
+  Future<void> onInit() async {
+    super.onInit();
+    await getPets();
+  }
+
   Future<void> getPets() async {
     int userId = sessionController.currentUser?.id ?? -1;
 
@@ -24,11 +30,10 @@ class ViewPetsController extends GetxController {
     }
 
     try {
-      final response = await dioClient.get('pet/$userId');
+      final response = await dioClient.get('pets?ownerId=$userId');
       final List<Pet> petsFromApi =
           response.data.map<Pet>((json) => Pet.fromJson(json)).toList();
       pets.addAll(petsFromApi);
-      isLoading.value = false;
     } on DioException catch (e) {
       Get.back(); //hide dialog
       Get.snackbar(
@@ -36,6 +41,8 @@ class ViewPetsController extends GetxController {
         'Please try again later',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -43,7 +50,7 @@ class ViewPetsController extends GetxController {
     int petId,
   ) async {
     try {
-      await dioClient.delete('pet/$petId');
+      await dioClient.delete('pets/$petId');
       return true;
     } on DioException catch (e) {
       Get.snackbar(

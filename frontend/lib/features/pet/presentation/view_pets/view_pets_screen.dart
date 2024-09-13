@@ -108,37 +108,29 @@ class ViewPetsScreen extends StatelessWidget {
                                 }
                               },
                               child: ListTile(
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            pet.name,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 30,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Age: ${pet.age}',
-                                            style: const TextStyle(height: 3),
-                                          ),
-                                          Text(
-                                            'Breed: ${pet.breeds}',
-                                            style: const TextStyle(height: 3),
-                                          )
-                                        ],
+                                onTap: () => Get.dialog(
+                                  AlertDialog(
+                                    backgroundColor:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? darkPrimaryColor
+                                            : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    content: SizedBox(
+                                      width:
+                                          kIsWeb ? Get.width * 0.35 : Get.width,
+                                      child: AddPetScreen(
+                                        pet: pet,
                                       ),
                                     ),
-                                  );
-                                },
+                                  ),
+                                ),
                                 title: Text(pet.name),
                                 leading: CircleAvatar(
                                     backgroundImage: AssetImage(
-                                  pet.species.name == 'Dog'
+                                  pet.breed.species == 'DOG'
                                       ? 'assets/icons/dog.png'
                                       : 'assets/icons/cat.jpg',
                                 )),
@@ -162,7 +154,7 @@ class ViewPetsScreen extends StatelessWidget {
             ),
             content: SizedBox(
               width: kIsWeb ? Get.width * 0.35 : Get.width,
-              child: const AddPetScreen(),
+              child: AddPetScreen(),
             ),
           ),
         ),
