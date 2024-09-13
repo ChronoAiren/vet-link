@@ -1,11 +1,11 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "tmp"
+tmp_dir = "generated/tmp"
 
 [build]
   args_bin = []
-  bin = "tmp\\main.exe"
-  cmd = "sqlc generate && go build -o ./tmp/main.exe ."
+  bin = "generated\\tmp\\VetlinkBackend.exe"
+  cmd = "go build -o ./generated/tmp/VetlinkBackend.exe ."
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "mysqlc"]
   exclude_file = []
@@ -35,8 +35,8 @@ tmp_dir = "tmp"
   watcher = "cyan"
 
 [log]
-  main_only = false
-  time = false
+  main_only = true
+  time = true
 
 [misc]
   clean_on_exit = false
