@@ -58,19 +58,20 @@ class RegisterCOController extends GetxController {
 
     try {
       await dioClient.post(
-        'clinics/register',
+        'clinic-owners',
         data: {
-          "Email": emailField.text,
-          "Password": passwordField.text,
-          "GivenName": firstName.text,
-          "FamilyName": lastName.text,
-          "Name": nameField.text,
-          "Location": locationField.text,
-          "BusinessNo": permitField.text,
+          "email": emailField.text,
+          "password": passwordField.text,
+          "givenName": firstName.text,
+          "familyName": lastName.text,
+          "name": nameField.text,
+          "location": locationField.text,
+          "businessNo": permitField.text,
         },
       );
 
-      Get.back(); //hide dialog
+      Get.back();
+      Get.toNamed('/login'); //hide dialog
       Get.snackbar(
         'Done registering',
         'Please wait for your clinic registration request to be verified',

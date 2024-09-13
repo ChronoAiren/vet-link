@@ -7,7 +7,8 @@ part 'breed_model.g.dart';
 class Breed with _$Breed {
   factory Breed({
     required int id,
-    required String name,
+    required String breed,
+    required String? species,
   }) = _Breed;
 
   factory Breed.fromJson(Map<String, dynamic> json) => _$BreedFromJson(json);

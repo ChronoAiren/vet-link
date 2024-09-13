@@ -19,7 +19,11 @@ class AddStaffController extends GetxController {
     int clinicId = sessionController.currentClinic?.id ?? -1;
 
     if (clinicId == -1) {
-      //Cannot detect a clinic you are affiliated with.
+      Get.snackbar(
+        'Cannot detect a clinic you are affiliated with.',
+        'Please try again later',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
@@ -35,12 +39,13 @@ class AddStaffController extends GetxController {
 
       try {
         final response = await dioClient.post(
-          'add-staff',
+          'employees/${userRole.value == 'VETERINARIAN STAFF' ? 'veterinarian' : 'receptionist'}',
           data: {
-            "Email": emailField.text,
-            "GivenName": firstNameField.text,
-            "FamilyName": lastNameField.text,
-            "userRole": userRole.value,
+            "id": clinicId,
+            "email": emailField.text,
+            "givenName": firstNameField.text,
+            "familyName": lastNameField.text,
+            "password": '12345',
           },
         );
 

@@ -46,7 +46,7 @@ class CustomTextField extends StatelessWidget {
         filled: Theme.of(context).brightness != Brightness.dark,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12.0,
-          vertical: 14.0,
+          vertical: 12.0,
         ),
         floatingLabelBehavior: floatLabel ? null : FloatingLabelBehavior.never,
         suffixIcon: suffixIcon,

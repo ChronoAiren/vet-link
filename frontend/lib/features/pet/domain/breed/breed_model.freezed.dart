@@ -21,7 +21,8 @@ Breed _$BreedFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Breed {
   int get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
+  String get breed => throw _privateConstructorUsedError;
+  String? get species => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -33,7 +34,7 @@ abstract class $BreedCopyWith<$Res> {
   factory $BreedCopyWith(Breed value, $Res Function(Breed) then) =
       _$BreedCopyWithImpl<$Res, Breed>;
   @useResult
-  $Res call({int id, String name});
+  $Res call({int id, String breed, String? species});
 }
 
 /// @nodoc
@@ -50,17 +51,22 @@ class _$BreedCopyWithImpl<$Res, $Val extends Breed>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
+    Object? breed = null,
+    Object? species = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
+      breed: null == breed
+          ? _value.breed
+          : breed // ignore: cast_nullable_to_non_nullable
               as String,
+      species: freezed == species
+          ? _value.species
+          : species // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -72,7 +78,7 @@ abstract class _$$BreedImplCopyWith<$Res> implements $BreedCopyWith<$Res> {
       __$$BreedImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, String name});
+  $Res call({int id, String breed, String? species});
 }
 
 /// @nodoc
@@ -87,17 +93,22 @@ class __$$BreedImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
+    Object? breed = null,
+    Object? species = freezed,
   }) {
     return _then(_$BreedImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
+      breed: null == breed
+          ? _value.breed
+          : breed // ignore: cast_nullable_to_non_nullable
               as String,
+      species: freezed == species
+          ? _value.species
+          : species // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -105,7 +116,7 @@ class __$$BreedImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$BreedImpl implements _Breed {
-  _$BreedImpl({required this.id, required this.name});
+  _$BreedImpl({required this.id, required this.breed, required this.species});
 
   factory _$BreedImpl.fromJson(Map<String, dynamic> json) =>
       _$$BreedImplFromJson(json);
@@ -113,11 +124,13 @@ class _$BreedImpl implements _Breed {
   @override
   final int id;
   @override
-  final String name;
+  final String breed;
+  @override
+  final String? species;
 
   @override
   String toString() {
-    return 'Breed(id: $id, name: $name)';
+    return 'Breed(id: $id, breed: $breed, species: $species)';
   }
 
   @override
@@ -126,12 +139,13 @@ class _$BreedImpl implements _Breed {
         (other.runtimeType == runtimeType &&
             other is _$BreedImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name));
+            (identical(other.breed, breed) || other.breed == breed) &&
+            (identical(other.species, species) || other.species == species));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name);
+  int get hashCode => Object.hash(runtimeType, id, breed, species);
 
   @JsonKey(ignore: true)
   @override
@@ -148,15 +162,19 @@ class _$BreedImpl implements _Breed {
 }
 
 abstract class _Breed implements Breed {
-  factory _Breed({required final int id, required final String name}) =
-      _$BreedImpl;
+  factory _Breed(
+      {required final int id,
+      required final String breed,
+      required final String? species}) = _$BreedImpl;
 
   factory _Breed.fromJson(Map<String, dynamic> json) = _$BreedImpl.fromJson;
 
   @override
   int get id;
   @override
-  String get name;
+  String get breed;
+  @override
+  String? get species;
   @override
   @JsonKey(ignore: true)
   _$$BreedImplCopyWith<_$BreedImpl> get copyWith =>

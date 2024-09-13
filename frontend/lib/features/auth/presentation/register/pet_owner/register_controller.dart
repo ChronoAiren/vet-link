@@ -29,12 +29,12 @@ class RegisterController extends GetxController {
 
       try {
         final response = await dioClient.post(
-          'register',
+          'pet-owners',
           data: {
-            "Email": emailField.text,
-            "Password": passwordField.text,
-            "GivenName": firstName.text,
-            "FamilyName": lastName.text,
+            "email": emailField.text,
+            "password": passwordField.text,
+            "givenName": firstName.text,
+            "familyName": lastName.text,
           },
         );
 

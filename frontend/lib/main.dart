@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/common/controllers/drawer_controller.dart';
 import 'package:frontend/common/controllers/session_controller.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:frontend/common/constants/routes.dart';
-import 'package:frontend/common/controllers/_bindings.dart';
 import 'package:frontend/styles/dark_theme.dart';
 import 'package:frontend/styles/light_theme.dart';
 import 'package:get/get.dart';
@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put<SessionController>(SessionController(), permanent: true);
+  Get.put<CustomDrawerController>(CustomDrawerController(), permanent: true);
   runApp(const MyApp());
 }
 
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialBinding: AllControllerBinding(),
+      // initialBinding: AllControllerBinding(),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         breakpoints: [
           const Breakpoint(start: 0, end: 450, name: MOBILE),

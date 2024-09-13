@@ -44,130 +44,143 @@ class VerifyClinicOwnerScreen extends StatelessWidget {
                           color: lightAccentColor,
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.only(
-                          bottom: 15.0,
-                        ),
-                        shrinkWrap: true,
-                        itemCount:
-                            controller.clinicsForVerification.value.length,
-                        itemBuilder: (context, index) {
-                          final clinicVerifInfo =
-                              controller.clinicsForVerification.value[index];
+                    : controller.clinicsForVerification.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No clinics to verify at the moment',
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(
+                              bottom: 15.0,
+                            ),
+                            shrinkWrap: true,
+                            itemCount: controller.clinicsForVerification.length,
+                            itemBuilder: (context, index) {
+                              final clinicVerifInfo =
+                                  controller.clinicsForVerification[index];
 
-                          return GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text(
-                                      'Registration Request',
-                                      style: bodyBoldPoppins,
-                                    ),
-                                    content: Column(
+                              return GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text(
+                                          'Registration Request',
+                                          style: bodyBoldPoppins,
+                                        ),
+                                        content: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text(
+                                              'Name',
+                                              style: smallSemiboldPoppins,
+                                            ),
+                                            Text(
+                                              '${clinicVerifInfo.owner.givenName} ${clinicVerifInfo.owner.familyName}',
+                                              style: smallRegularPoppins,
+                                            ),
+                                            const SizedBox(
+                                              height: 10.0,
+                                            ),
+                                            const Text(
+                                              'Clinic',
+                                              style: smallSemiboldPoppins,
+                                            ),
+                                            Text(
+                                              clinicVerifInfo.name,
+                                              style: smallRegularPoppins,
+                                            ),
+                                            const SizedBox(
+                                              height: 10.0,
+                                            ),
+                                            const Text(
+                                              'Location',
+                                              style: smallSemiboldPoppins,
+                                            ),
+                                            Text(
+                                              clinicVerifInfo.location,
+                                              style: smallRegularPoppins,
+                                            ),
+                                            const SizedBox(
+                                              height: 10.0,
+                                            ),
+                                            const Text(
+                                              'Business Permit',
+                                              style: smallSemiboldPoppins,
+                                            ),
+                                            Text(
+                                              clinicVerifInfo.businessPermit,
+                                              style: smallRegularPoppins,
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: const Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text(
+                                              'Approve',
+                                              style: TextStyle(
+                                                color: lightSecondaryColor,
+                                              ),
+                                            ),
+                                            onPressed: () async {
+                                              final isUpdated = await controller
+                                                  .approveRegistration(
+                                                clinicVerifInfo.id,
+                                              );
+                                              if (isUpdated) {
+                                                controller
+                                                    .clinicsForVerification
+                                                    .removeAt(index);
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Text(
-                                          'Name',
-                                          style: smallSemiboldPoppins,
-                                        ),
-                                        Text(
-                                          '${clinicVerifInfo.owner.givenName} ${clinicVerifInfo.owner.familyName}',
-                                          style: smallRegularPoppins,
-                                        ),
-                                        const SizedBox(
-                                          height: 10.0,
-                                        ),
-                                        const Text(
-                                          'Clinic',
-                                          style: smallSemiboldPoppins,
-                                        ),
                                         Text(
                                           clinicVerifInfo.name,
-                                          style: smallRegularPoppins,
-                                        ),
-                                        const SizedBox(
-                                          height: 10.0,
-                                        ),
-                                        const Text(
-                                          'Location',
-                                          style: smallSemiboldPoppins,
+                                          style: bodyRegularPoppins,
                                         ),
                                         Text(
                                           clinicVerifInfo.location,
-                                          style: smallRegularPoppins,
-                                        ),
-                                        const SizedBox(
-                                          height: 10.0,
-                                        ),
-                                        const Text(
-                                          'Business Permit',
                                           style: smallSemiboldPoppins,
                                         ),
                                         Text(
-                                          clinicVerifInfo.businessPermit,
+                                          'Owned by: ${clinicVerifInfo.owner.givenName} ${clinicVerifInfo.owner.familyName}',
                                           style: smallRegularPoppins,
                                         ),
                                       ],
                                     ),
-                                    actions: [
-                                      TextButton(
-                                        child: const Text(
-                                          'Decline',
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog
-                                        },
-                                      ),
-                                      TextButton(
-                                        child: const Text(
-                                          'Approve',
-                                          style: TextStyle(
-                                            color: lightSecondaryColor,
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
+                                  ),
+                                ),
                               );
                             },
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      clinicVerifInfo.name,
-                                      style: bodyRegularPoppins,
-                                    ),
-                                    Text(
-                                      clinicVerifInfo.location,
-                                      style: smallSemiboldPoppins,
-                                    ),
-                                    Text(
-                                      'Owned by: ${clinicVerifInfo.owner.givenName} ${clinicVerifInfo.owner.familyName}',
-                                      style: smallRegularPoppins,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                          ),
               ),
             ),
           ],

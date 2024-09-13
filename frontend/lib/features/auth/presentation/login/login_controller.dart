@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/common/controllers/session_controller.dart';
+import 'package:frontend/features/auth/domain/clinic/clinic_model.dart';
 import 'package:frontend/features/auth/domain/user/user_model.dart';
 import 'package:frontend/utils/dio/dio_client.dart';
 import 'package:get/get.dart';
@@ -34,17 +35,28 @@ class LoginController extends GetxController {
         final response = await dioClient.post(
           'login',
           data: {
-            "Email": emailField.text,
-            "Password": passwordField.text,
+            "email": emailField.text,
+            "password": passwordField.text,
           },
         );
 
         final user = User.fromJson(response.data);
+
+        if (user.userRole == 'UNVERIFIED CLINIC OWNER') {
+          Get.back(); //hide dialog
+          Get.snackbar(
+            'UNVERIFIED',
+            'Please wait to be verified first',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+
         sessionController.setCurrentUser(user);
 
         if (user.userRole == 'CLINIC OWNER') {
-          //get clinic
-          //sessionController.setCurrentClinic
+          final Clinic clinic = await getClinic(user.id);
+          sessionController.setCurrentClinic(clinic);
         }
 
         Get.back(); //hide dialog
@@ -58,5 +70,11 @@ class LoginController extends GetxController {
         );
       }
     }
+  }
+
+  Future<Clinic> getClinic(int userId) async {
+    final response = await dioClient.get('clinic-owners/$userId');
+    final clinic = Clinic.fromJson(response.data);
+    return clinic;
   }
 }
