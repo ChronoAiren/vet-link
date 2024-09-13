@@ -4,6 +4,7 @@ import (
 	"backend/framework"
 	"backend/generated/models"
 	"backend/globals"
+	"backend/services/users"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"time"
@@ -71,20 +72,48 @@ func (s *Service) handleUpdate(c *framework.Context, data framework.ResultChan, 
 	if e := c.Api.Bind(params); e != nil {
 		err <- e
 	} else if e := s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
-		pet, e := models.FindPet(c.GetContext(), tx, params.ID)
-		if e != nil {
+		if pet, e := models.FindPet(c.GetContext(), tx, params.ID); e != nil {
 			return e
-		}
-		e = pet.Update(c.GetContext(), tx, &models.PetSetter{
+		} else if e = pet.Update(c.GetContext(), tx, &models.PetSetter{
 			Name:      omit.FromPtr(params.Name),
 			Gender:    omit.FromPtr(params.Gender),
 			Birthdate: omit.FromPtr(params.Birthdate),
 			BreedID:   omit.FromPtr(params.BreedID),
-		})
-		data <- "Successfully updated pet"
+		}); e != nil {
+			return e
+		}
 		return nil
 	}); e != nil {
 		err <- e
+	} else {
+		updated, e := models.Pets.Query(
+			c.GetContext(), s.Store.Db,
+			models.SelectWhere.Pets.ID.EQ(params.ID),
+			models.PreloadPetBreed(),
+			models.PreloadPetOwnerUser(),
+		).One()
+		if e != nil {
+			err <- e
+			return
+		}
+		birthdate, _ := time.Parse(time.DateOnly, updated.Birthdate)
+		data <- PetDTO{
+			ID:        updated.ID,
+			Name:      updated.Name,
+			Age:       globals.CalculateAge(birthdate),
+			Gender:    updated.Gender,
+			Birthdate: updated.Birthdate,
+			Breed: &BreedDTO{
+				ID:    updated.R.Breed.ID,
+				Breed: updated.R.Breed.Description,
+			},
+			Owner: &users.UserResponse{
+				ID:         updated.R.OwnerUser.ID,
+				Email:      updated.R.OwnerUser.Email,
+				FamilyName: updated.R.OwnerUser.FamilyName,
+				GivenName:  updated.R.OwnerUser.GivenName,
+			},
+		}
 	}
 }
 
