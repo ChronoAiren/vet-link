@@ -4,17 +4,31 @@
 package factory
 
 type Factory struct {
+	baseAnimalMods   AnimalModSlice
 	baseBreedMods    BreedModSlice
 	baseClinicMods   ClinicModSlice
 	baseEmployeeMods EmployeeModSlice
 	basePetMods      PetModSlice
 	baseRoleMods     RoleModSlice
-	baseSpecyMods    SpecyModSlice
+	baseServiceMods  ServiceModSlice
+	baseTimeslotMods TimeslotModSlice
 	baseUserMods     UserModSlice
 }
 
 func New() *Factory {
 	return &Factory{}
+}
+
+func (f *Factory) NewAnimal(mods ...AnimalMod) *AnimalTemplate {
+	o := &AnimalTemplate{f: f}
+
+	if f != nil {
+		f.baseAnimalMods.Apply(o)
+	}
+
+	AnimalModSlice(mods).Apply(o)
+
+	return o
 }
 
 func (f *Factory) NewBreed(mods ...BreedMod) *BreedTemplate {
@@ -77,14 +91,26 @@ func (f *Factory) NewRole(mods ...RoleMod) *RoleTemplate {
 	return o
 }
 
-func (f *Factory) NewSpecy(mods ...SpecyMod) *SpecyTemplate {
-	o := &SpecyTemplate{f: f}
+func (f *Factory) NewService(mods ...ServiceMod) *ServiceTemplate {
+	o := &ServiceTemplate{f: f}
 
 	if f != nil {
-		f.baseSpecyMods.Apply(o)
+		f.baseServiceMods.Apply(o)
 	}
 
-	SpecyModSlice(mods).Apply(o)
+	ServiceModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewTimeslot(mods ...TimeslotMod) *TimeslotTemplate {
+	o := &TimeslotTemplate{f: f}
+
+	if f != nil {
+		f.baseTimeslotMods.Apply(o)
+	}
+
+	TimeslotModSlice(mods).Apply(o)
 
 	return o
 }
@@ -99,6 +125,14 @@ func (f *Factory) NewUser(mods ...UserMod) *UserTemplate {
 	UserModSlice(mods).Apply(o)
 
 	return o
+}
+
+func (f *Factory) ClearBaseAnimalMods() {
+	f.baseAnimalMods = nil
+}
+
+func (f *Factory) AddBaseAnimalMod(mods ...AnimalMod) {
+	f.baseAnimalMods = append(f.baseAnimalMods, mods...)
 }
 
 func (f *Factory) ClearBaseBreedMods() {
@@ -141,12 +175,20 @@ func (f *Factory) AddBaseRoleMod(mods ...RoleMod) {
 	f.baseRoleMods = append(f.baseRoleMods, mods...)
 }
 
-func (f *Factory) ClearBaseSpecyMods() {
-	f.baseSpecyMods = nil
+func (f *Factory) ClearBaseServiceMods() {
+	f.baseServiceMods = nil
 }
 
-func (f *Factory) AddBaseSpecyMod(mods ...SpecyMod) {
-	f.baseSpecyMods = append(f.baseSpecyMods, mods...)
+func (f *Factory) AddBaseServiceMod(mods ...ServiceMod) {
+	f.baseServiceMods = append(f.baseServiceMods, mods...)
+}
+
+func (f *Factory) ClearBaseTimeslotMods() {
+	f.baseTimeslotMods = nil
+}
+
+func (f *Factory) AddBaseTimeslotMod(mods ...TimeslotMod) {
+	f.baseTimeslotMods = append(f.baseTimeslotMods, mods...)
 }
 
 func (f *Factory) ClearBaseUserMods() {

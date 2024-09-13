@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/framework"
+	. "backend/globals"
 	"backend/services/pets"
 	"backend/services/users"
 	"backend/services/users/employees"
@@ -10,10 +11,12 @@ import (
 	"backend/services/users/owners/clinicowners"
 	"backend/services/users/owners/petowners"
 	"backend/store"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gopkg.in/yaml.v3"
+	"net/http"
 	"os"
 )
 
@@ -26,6 +29,17 @@ func run() (err error) {
 
 	f := framework.New(echo.New(), *d)
 	f.Api.Use(middleware.CORS())
+	f.Api.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogStatus: true, LogURI: true, LogMethod: true, LogRemoteIP: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			color := Elvis(v.Status == http.StatusOK, Green, Red)
+			fmt.Printf(
+				Colorize(Yellow, "%-15s")+Colorize(color, " %3d")+" %6s %s\n",
+				v.RemoteIP, v.Status, v.Method, v.URI,
+			)
+			return nil
+		},
+	}))
 	f.RegisterServices(
 		// User-related services
 		users.New(),
@@ -38,9 +52,6 @@ func run() (err error) {
 		// Pet-related services
 		pets.New(),
 	)
-	f.Api.GET("/test", func(c echo.Context) error {
-		return c.String(200, "Hello, World!")
-	})
 
 	err = f.Api.Start(env.Port)
 	return

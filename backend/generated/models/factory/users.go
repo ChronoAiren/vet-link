@@ -35,8 +35,8 @@ func (mods UserModSlice) Apply(n *UserTemplate) {
 // all columns are optional and should be set by mods
 type UserTemplate struct {
 	ID         func() uint32
-	GivenName  func() string
 	FamilyName func() string
+	GivenName  func() string
 	Email      func() string
 	Password   func() string
 	RoleID     func() uint8
@@ -46,10 +46,11 @@ type UserTemplate struct {
 }
 
 type userR struct {
-	Employees []*userREmployeesR
-	OwnerPets []*userROwnerPetsR
-	Clinics   []*userRClinicsR
-	Role      *userRRoleR
+	Employees    []*userREmployeesR
+	OwnerPets    []*userROwnerPetsR
+	VetTimeslots []*userRVetTimeslotsR
+	Clinics      []*userRClinicsR
+	Role         *userRRoleR
 }
 
 type userREmployeesR struct {
@@ -59,6 +60,10 @@ type userREmployeesR struct {
 type userROwnerPetsR struct {
 	number int
 	o      *PetTemplate
+}
+type userRVetTimeslotsR struct {
+	number int
+	o      *TimeslotTemplate
 }
 type userRClinicsR struct {
 	number int
@@ -83,11 +88,11 @@ func (o UserTemplate) toModel() *models.User {
 	if o.ID != nil {
 		m.ID = o.ID()
 	}
-	if o.GivenName != nil {
-		m.GivenName = o.GivenName()
-	}
 	if o.FamilyName != nil {
 		m.FamilyName = o.FamilyName()
+	}
+	if o.GivenName != nil {
+		m.GivenName = o.GivenName()
 	}
 	if o.Email != nil {
 		m.Email = o.Email()
@@ -143,6 +148,19 @@ func (t UserTemplate) setModelRels(o *models.User) {
 		o.R.OwnerPets = rel
 	}
 
+	if t.r.VetTimeslots != nil {
+		rel := models.TimeslotSlice{}
+		for _, r := range t.r.VetTimeslots {
+			related := r.o.toModels(r.number)
+			for _, rel := range related {
+				rel.VetID = o.ID
+				rel.R.VetUser = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.VetTimeslots = rel
+	}
+
 	if t.r.Clinics != nil {
 		rel := models.ClinicSlice{}
 		for _, r := range t.r.Clinics {
@@ -172,11 +190,11 @@ func (o UserTemplate) BuildSetter() *models.UserSetter {
 	if o.ID != nil {
 		m.ID = omit.From(o.ID())
 	}
-	if o.GivenName != nil {
-		m.GivenName = omit.From(o.GivenName())
-	}
 	if o.FamilyName != nil {
 		m.FamilyName = omit.From(o.FamilyName())
+	}
+	if o.GivenName != nil {
+		m.GivenName = omit.From(o.GivenName())
 	}
 	if o.Email != nil {
 		m.Email = omit.From(o.Email())
@@ -227,11 +245,11 @@ func (o UserTemplate) BuildMany(number int) models.UserSlice {
 }
 
 func ensureCreatableUser(m *models.UserSetter) {
-	if m.GivenName.IsUnset() {
-		m.GivenName = omit.From(random_string(nil))
-	}
 	if m.FamilyName.IsUnset() {
 		m.FamilyName = omit.From(random_string(nil))
+	}
+	if m.GivenName.IsUnset() {
+		m.GivenName = omit.From(random_string(nil))
 	}
 	if m.Email.IsUnset() {
 		m.Email = omit.From(random_string(nil))
@@ -280,15 +298,30 @@ func (o *UserTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *
 		}
 	}
 
-	if o.r.Clinics != nil {
-		for _, r := range o.r.Clinics {
-			var rel2 models.ClinicSlice
+	if o.r.VetTimeslots != nil {
+		for _, r := range o.r.VetTimeslots {
+			var rel2 models.TimeslotSlice
 			ctx, rel2, err = r.o.createMany(ctx, exec, r.number)
 			if err != nil {
 				return ctx, err
 			}
 
-			err = m.AttachClinics(ctx, exec, rel2...)
+			err = m.AttachVetTimeslots(ctx, exec, rel2...)
+			if err != nil {
+				return ctx, err
+			}
+		}
+	}
+
+	if o.r.Clinics != nil {
+		for _, r := range o.r.Clinics {
+			var rel3 models.ClinicSlice
+			ctx, rel3, err = r.o.createMany(ctx, exec, r.number)
+			if err != nil {
+				return ctx, err
+			}
+
+			err = m.AttachClinics(ctx, exec, rel3...)
 			if err != nil {
 				return ctx, err
 			}
@@ -337,21 +370,21 @@ func (o *UserTemplate) create(ctx context.Context, exec bob.Executor) (context.C
 	opt := o.BuildSetter()
 	ensureCreatableUser(opt)
 
-	var rel3 *models.Role
+	var rel4 *models.Role
 	if o.r.Role == nil {
 		var ok bool
-		rel3, ok = roleCtx.Value(ctx)
+		rel4, ok = roleCtx.Value(ctx)
 		if !ok {
 			UserMods.WithNewRole().Apply(o)
 		}
 	}
 	if o.r.Role != nil {
-		ctx, rel3, err = o.r.Role.o.create(ctx, exec)
+		ctx, rel4, err = o.r.Role.o.create(ctx, exec)
 		if err != nil {
 			return ctx, nil, err
 		}
 	}
-	opt.RoleID = omit.From(rel3.ID)
+	opt.RoleID = omit.From(rel4.ID)
 
 	m, err := models.Users.Insert(ctx, exec, opt)
 	if err != nil {
@@ -359,7 +392,7 @@ func (o *UserTemplate) create(ctx context.Context, exec bob.Executor) (context.C
 	}
 	ctx = userCtx.WithValue(ctx, m)
 
-	m.R.Role = rel3
+	m.R.Role = rel4
 
 	ctx, err = o.insertOptRels(ctx, exec, m)
 	return ctx, m, err
@@ -421,8 +454,8 @@ type userMods struct{}
 func (m userMods) RandomizeAllColumns(f *faker.Faker) UserMod {
 	return UserModSlice{
 		UserMods.RandomID(f),
-		UserMods.RandomGivenName(f),
 		UserMods.RandomFamilyName(f),
+		UserMods.RandomGivenName(f),
 		UserMods.RandomEmail(f),
 		UserMods.RandomPassword(f),
 		UserMods.RandomRoleID(f),
@@ -461,37 +494,6 @@ func (m userMods) RandomID(f *faker.Faker) UserMod {
 }
 
 // Set the model columns to this value
-func (m userMods) GivenName(val string) UserMod {
-	return UserModFunc(func(o *UserTemplate) {
-		o.GivenName = func() string { return val }
-	})
-}
-
-// Set the Column from the function
-func (m userMods) GivenNameFunc(f func() string) UserMod {
-	return UserModFunc(func(o *UserTemplate) {
-		o.GivenName = f
-	})
-}
-
-// Clear any values for the column
-func (m userMods) UnsetGivenName() UserMod {
-	return UserModFunc(func(o *UserTemplate) {
-		o.GivenName = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-func (m userMods) RandomGivenName(f *faker.Faker) UserMod {
-	return UserModFunc(func(o *UserTemplate) {
-		o.GivenName = func() string {
-			return random_string(f)
-		}
-	})
-}
-
-// Set the model columns to this value
 func (m userMods) FamilyName(val string) UserMod {
 	return UserModFunc(func(o *UserTemplate) {
 		o.FamilyName = func() string { return val }
@@ -517,6 +519,37 @@ func (m userMods) UnsetFamilyName() UserMod {
 func (m userMods) RandomFamilyName(f *faker.Faker) UserMod {
 	return UserModFunc(func(o *UserTemplate) {
 		o.FamilyName = func() string {
+			return random_string(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m userMods) GivenName(val string) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.GivenName = func() string { return val }
+	})
+}
+
+// Set the Column from the function
+func (m userMods) GivenNameFunc(f func() string) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.GivenName = f
+	})
+}
+
+// Clear any values for the column
+func (m userMods) UnsetGivenName() UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.GivenName = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m userMods) RandomGivenName(f *faker.Faker) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.GivenName = func() string {
 			return random_string(f)
 		}
 	})
@@ -710,6 +743,44 @@ func (m userMods) AddNewOwnerPets(number int, mods ...PetMod) UserMod {
 func (m userMods) WithoutOwnerPets() UserMod {
 	return UserModFunc(func(o *UserTemplate) {
 		o.r.OwnerPets = nil
+	})
+}
+
+func (m userMods) WithVetTimeslots(number int, related *TimeslotTemplate) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.VetTimeslots = []*userRVetTimeslotsR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m userMods) WithNewVetTimeslots(number int, mods ...TimeslotMod) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		related := o.f.NewTimeslot(mods...)
+		m.WithVetTimeslots(number, related).Apply(o)
+	})
+}
+
+func (m userMods) AddVetTimeslots(number int, related *TimeslotTemplate) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.VetTimeslots = append(o.r.VetTimeslots, &userRVetTimeslotsR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m userMods) AddNewVetTimeslots(number int, mods ...TimeslotMod) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		related := o.f.NewTimeslot(mods...)
+		m.AddVetTimeslots(number, related).Apply(o)
+	})
+}
+
+func (m userMods) WithoutVetTimeslots() UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.VetTimeslots = nil
 	})
 }
 

@@ -35,7 +35,7 @@ func (mods BreedModSlice) Apply(n *BreedTemplate) {
 // all columns are optional and should be set by mods
 type BreedTemplate struct {
 	ID          func() uint32
-	SpeciesID   func() uint8
+	AnimalID    func() uint8
 	Description func() string
 
 	r breedR
@@ -43,9 +43,13 @@ type BreedTemplate struct {
 }
 
 type breedR struct {
-	Pets []*breedRPetsR
+	Animal *breedRAnimalR
+	Pets   []*breedRPetsR
 }
 
+type breedRAnimalR struct {
+	o *AnimalTemplate
+}
 type breedRPetsR struct {
 	number int
 	o      *PetTemplate
@@ -66,8 +70,8 @@ func (o BreedTemplate) toModel() *models.Breed {
 	if o.ID != nil {
 		m.ID = o.ID()
 	}
-	if o.SpeciesID != nil {
-		m.SpeciesID = o.SpeciesID()
+	if o.AnimalID != nil {
+		m.AnimalID = o.AnimalID()
 	}
 	if o.Description != nil {
 		m.Description = o.Description()
@@ -91,6 +95,13 @@ func (o BreedTemplate) toModels(number int) models.BreedSlice {
 // setModelRels creates and sets the relationships on *models.Breed
 // according to the relationships in the template. Nothing is inserted into the db
 func (t BreedTemplate) setModelRels(o *models.Breed) {
+	if t.r.Animal != nil {
+		rel := t.r.Animal.o.toModel()
+		rel.R.Breeds = append(rel.R.Breeds, o)
+		o.AnimalID = rel.ID
+		o.R.Animal = rel
+	}
+
 	if t.r.Pets != nil {
 		rel := models.PetSlice{}
 		for _, r := range t.r.Pets {
@@ -113,8 +124,8 @@ func (o BreedTemplate) BuildSetter() *models.BreedSetter {
 	if o.ID != nil {
 		m.ID = omit.From(o.ID())
 	}
-	if o.SpeciesID != nil {
-		m.SpeciesID = omit.From(o.SpeciesID())
+	if o.AnimalID != nil {
+		m.AnimalID = omit.From(o.AnimalID())
 	}
 	if o.Description != nil {
 		m.Description = omit.From(o.Description())
@@ -159,8 +170,8 @@ func (o BreedTemplate) BuildMany(number int) models.BreedSlice {
 }
 
 func ensureCreatableBreed(m *models.BreedSetter) {
-	if m.SpeciesID.IsUnset() {
-		m.SpeciesID = omit.From(random_uint8(nil))
+	if m.AnimalID.IsUnset() {
+		m.AnimalID = omit.From(random_uint8(nil))
 	}
 	if m.Description.IsUnset() {
 		m.Description = omit.From(random_string(nil))
@@ -175,13 +186,13 @@ func (o *BreedTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m 
 
 	if o.r.Pets != nil {
 		for _, r := range o.r.Pets {
-			var rel0 models.PetSlice
-			ctx, rel0, err = r.o.createMany(ctx, exec, r.number)
+			var rel1 models.PetSlice
+			ctx, rel1, err = r.o.createMany(ctx, exec, r.number)
 			if err != nil {
 				return ctx, err
 			}
 
-			err = m.AttachPets(ctx, exec, rel0...)
+			err = m.AttachPets(ctx, exec, rel1...)
 			if err != nil {
 				return ctx, err
 			}
@@ -230,11 +241,29 @@ func (o *BreedTemplate) create(ctx context.Context, exec bob.Executor) (context.
 	opt := o.BuildSetter()
 	ensureCreatableBreed(opt)
 
+	var rel0 *models.Animal
+	if o.r.Animal == nil {
+		var ok bool
+		rel0, ok = animalCtx.Value(ctx)
+		if !ok {
+			BreedMods.WithNewAnimal().Apply(o)
+		}
+	}
+	if o.r.Animal != nil {
+		ctx, rel0, err = o.r.Animal.o.create(ctx, exec)
+		if err != nil {
+			return ctx, nil, err
+		}
+	}
+	opt.AnimalID = omit.From(rel0.ID)
+
 	m, err := models.Breeds.Insert(ctx, exec, opt)
 	if err != nil {
 		return ctx, nil, err
 	}
 	ctx = breedCtx.WithValue(ctx, m)
+
+	m.R.Animal = rel0
 
 	ctx, err = o.insertOptRels(ctx, exec, m)
 	return ctx, m, err
@@ -296,7 +325,7 @@ type breedMods struct{}
 func (m breedMods) RandomizeAllColumns(f *faker.Faker) BreedMod {
 	return BreedModSlice{
 		BreedMods.RandomID(f),
-		BreedMods.RandomSpeciesID(f),
+		BreedMods.RandomAnimalID(f),
 		BreedMods.RandomDescription(f),
 	}
 }
@@ -333,31 +362,31 @@ func (m breedMods) RandomID(f *faker.Faker) BreedMod {
 }
 
 // Set the model columns to this value
-func (m breedMods) SpeciesID(val uint8) BreedMod {
+func (m breedMods) AnimalID(val uint8) BreedMod {
 	return BreedModFunc(func(o *BreedTemplate) {
-		o.SpeciesID = func() uint8 { return val }
+		o.AnimalID = func() uint8 { return val }
 	})
 }
 
 // Set the Column from the function
-func (m breedMods) SpeciesIDFunc(f func() uint8) BreedMod {
+func (m breedMods) AnimalIDFunc(f func() uint8) BreedMod {
 	return BreedModFunc(func(o *BreedTemplate) {
-		o.SpeciesID = f
+		o.AnimalID = f
 	})
 }
 
 // Clear any values for the column
-func (m breedMods) UnsetSpeciesID() BreedMod {
+func (m breedMods) UnsetAnimalID() BreedMod {
 	return BreedModFunc(func(o *BreedTemplate) {
-		o.SpeciesID = nil
+		o.AnimalID = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-func (m breedMods) RandomSpeciesID(f *faker.Faker) BreedMod {
+func (m breedMods) RandomAnimalID(f *faker.Faker) BreedMod {
 	return BreedModFunc(func(o *BreedTemplate) {
-		o.SpeciesID = func() uint8 {
+		o.AnimalID = func() uint8 {
 			return random_uint8(f)
 		}
 	})
@@ -391,6 +420,28 @@ func (m breedMods) RandomDescription(f *faker.Faker) BreedMod {
 		o.Description = func() string {
 			return random_string(f)
 		}
+	})
+}
+
+func (m breedMods) WithAnimal(rel *AnimalTemplate) BreedMod {
+	return BreedModFunc(func(o *BreedTemplate) {
+		o.r.Animal = &breedRAnimalR{
+			o: rel,
+		}
+	})
+}
+
+func (m breedMods) WithNewAnimal(mods ...AnimalMod) BreedMod {
+	return BreedModFunc(func(o *BreedTemplate) {
+		related := o.f.NewAnimal(mods...)
+
+		m.WithAnimal(related).Apply(o)
+	})
+}
+
+func (m breedMods) WithoutAnimal() BreedMod {
+	return BreedModFunc(func(o *BreedTemplate) {
+		o.r.Animal = nil
 	})
 }
 

@@ -3,7 +3,7 @@ package pets
 import (
 	"backend/framework"
 	"backend/generated/models"
-	"backend/globals"
+	. "backend/globals"
 	"backend/services/users"
 	"github.com/stephenafamo/bob"
 	"time"
@@ -13,29 +13,14 @@ func (s *Service) handleList(c *framework.Context, data framework.ResultChan, er
 	params := new(listRequest)
 	if e := c.Api.Bind(params); e != nil {
 		err <- e
-	} else if pets, e := models.Pets.Query(
-		c.GetContext(), s.Store.Db,
+	} else if pets, e := listPets(
+		c, s.Store.Db,
 		models.SelectWhere.Pets.OwnerID.EQ(params.OwnerID),
-		models.PreloadPetBreed(),
-	).All(); e != nil {
+		models.PreloadPetBreed(models.ThenLoadBreedAnimal()),
+	); e != nil {
 		err <- e
 	} else {
-		var DTOs []PetDTO
-		for _, pet := range pets {
-			birthdate, _ := time.Parse(time.DateOnly, pet.Birthdate)
-			DTOs = append(DTOs, PetDTO{
-				ID:        pet.ID,
-				Name:      pet.Name,
-				Age:       globals.CalculateAge(birthdate),
-				Gender:    pet.Gender,
-				Birthdate: pet.Birthdate,
-				Breed: &BreedDTO{
-					ID:    pet.R.Breed.ID,
-					Breed: pet.R.Breed.Description,
-				},
-			})
-		}
-		data <- DTOs
+		data <- pets
 	}
 }
 
@@ -46,7 +31,7 @@ func (s *Service) handleRead(c *framework.Context, data framework.ResultChan, er
 	} else if pet, e := models.Pets.Query(
 		c.GetContext(), s.Store.Db,
 		models.SelectWhere.Pets.ID.EQ(params.ID),
-		models.PreloadPetBreed(),
+		models.PreloadPetBreed(models.ThenLoadBreedAnimal()),
 	).One(); e != nil {
 		err <- e
 	} else if birthdate, e := time.Parse(time.DateOnly, pet.Birthdate); e != nil {
@@ -55,12 +40,13 @@ func (s *Service) handleRead(c *framework.Context, data framework.ResultChan, er
 		data <- PetDTO{
 			ID:        pet.ID,
 			Name:      pet.Name,
-			Age:       globals.CalculateAge(birthdate),
-			Gender:    pet.Gender,
+			Age:       CalculateAge(birthdate),
+			Gender:    Elvis(pet.Gender, "Male", "Female"),
 			Birthdate: pet.Birthdate,
 			Breed: &BreedDTO{
-				ID:    pet.R.Breed.ID,
-				Breed: pet.R.Breed.Description,
+				ID:      pet.R.Breed.ID,
+				Breed:   pet.R.Breed.Description,
+				Species: &pet.R.Breed.R.Animal.Description,
 			},
 		}
 	}
@@ -89,8 +75,8 @@ func (s *Service) handleUpdate(c *framework.Context, data framework.ResultChan, 
 		data <- PetDTO{
 			ID:        updated.ID,
 			Name:      updated.Name,
-			Age:       globals.CalculateAge(birthdate),
-			Gender:    updated.Gender,
+			Age:       CalculateAge(birthdate),
+			Gender:    Elvis(updated.Gender, "Male", "Female"),
 			Birthdate: updated.Birthdate,
 			Breed: &BreedDTO{
 				ID:    updated.R.Breed.ID,
@@ -142,7 +128,10 @@ func (s *Service) handleReadAllBreeds(c *framework.Context, data framework.Resul
 	if e := c.Api.Bind(params); e != nil {
 		err <- e
 	} else if e = s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
-		breeds, e := listBreeds(c, tx, models.SelectWhere.Breeds.SpeciesID.EQ(params.SpeciesID))
+		breeds, e := listBreeds(c, tx,
+			models.SelectWhere.Breeds.AnimalID.EQ(params.AnimalID),
+			models.PreloadBreedAnimal(),
+		)
 		if e != nil {
 			return e
 		}
@@ -154,6 +143,7 @@ func (s *Service) handleReadAllBreeds(c *framework.Context, data framework.Resul
 }
 
 type BreedDTO struct {
-	ID    uint32 `json:"id"`
-	Breed string `json:"breed"`
+	ID      uint32  `json:"id"`
+	Breed   string  `json:"breed"`
+	Species *string `json:"species,omitempty"`
 }

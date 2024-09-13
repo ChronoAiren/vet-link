@@ -12,12 +12,14 @@ import (
 type contextKey string
 
 var (
+	animalCtx   = newContextual[*models.Animal]("animal")
 	breedCtx    = newContextual[*models.Breed]("breed")
 	clinicCtx   = newContextual[*models.Clinic]("clinic")
 	employeeCtx = newContextual[*models.Employee]("employee")
 	petCtx      = newContextual[*models.Pet]("pet")
 	roleCtx     = newContextual[*models.Role]("role")
-	specyCtx    = newContextual[*models.Specy]("specy")
+	serviceCtx  = newContextual[*models.Service]("service")
+	timeslotCtx = newContextual[*models.Timeslot]("timeslot")
 	userCtx     = newContextual[*models.User]("user")
 )
 

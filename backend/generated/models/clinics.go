@@ -48,6 +48,7 @@ type ClinicsStmt = bob.QueryStmt[*Clinic, ClinicSlice]
 // clinicR is where relationships are stored.
 type clinicR struct {
 	Employees EmployeeSlice // fk_employees_clinics_clinic_id
+	Services  ServiceSlice  // fk_services_clinics_clinic_id
 	User      *User         // fk_user_clinics_clinics_user_id
 }
 
@@ -248,6 +249,7 @@ func buildClinicWhere[Q mysql.Filterable](cols clinicColumns) clinicWhere[Q] {
 type clinicJoins[Q dialect.Joinable] struct {
 	typ       string
 	Employees func(context.Context) modAs[Q, employeeColumns]
+	Services  func(context.Context) modAs[Q, serviceColumns]
 	User      func(context.Context) modAs[Q, userColumns]
 }
 
@@ -259,6 +261,7 @@ func buildClinicJoins[Q dialect.Joinable](cols clinicColumns, typ string) clinic
 	return clinicJoins[Q]{
 		typ:       typ,
 		Employees: clinicsJoinEmployees[Q](cols, typ),
+		Services:  clinicsJoinServices[Q](cols, typ),
 		User:      clinicsJoinUser[Q](cols, typ),
 	}
 }
@@ -377,6 +380,25 @@ func clinicsJoinEmployees[Q dialect.Joinable](from clinicColumns, typ string) fu
 	}
 }
 
+func clinicsJoinServices[Q dialect.Joinable](from clinicColumns, typ string) func(context.Context) modAs[Q, serviceColumns] {
+	return func(ctx context.Context) modAs[Q, serviceColumns] {
+		return modAs[Q, serviceColumns]{
+			c: ServiceColumns,
+			f: func(to serviceColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Services.Name(ctx).As(to.Alias())).On(
+						to.ClinicID.EQ(from.ID),
+					))
+				}
+
+				return mods
+			},
+		}
+	}
+}
+
 func clinicsJoinUser[Q dialect.Joinable](from clinicColumns, typ string) func(context.Context) modAs[Q, userColumns] {
 	return func(ctx context.Context) modAs[Q, userColumns] {
 		return modAs[Q, userColumns]{
@@ -414,6 +436,24 @@ func (os ClinicSlice) Employees(ctx context.Context, exec bob.Executor, mods ...
 	)...)
 }
 
+// Services starts a query for related objects on services
+func (o *Clinic) Services(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) ServicesQuery {
+	return Services.Query(ctx, exec, append(mods,
+		sm.Where(ServiceColumns.ClinicID.EQ(mysql.Arg(o.ID))),
+	)...)
+}
+
+func (os ClinicSlice) Services(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) ServicesQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = mysql.ArgGroup(o.ID)
+	}
+
+	return Services.Query(ctx, exec, append(mods,
+		sm.Where(mysql.Group(ServiceColumns.ClinicID).In(PKArgs...)),
+	)...)
+}
+
 // User starts a query for related objects on users
 func (o *Clinic) User(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) UsersQuery {
 	return Users.Query(ctx, exec, append(mods,
@@ -445,6 +485,20 @@ func (o *Clinic) Preload(name string, retrieved any) error {
 		}
 
 		o.R.Employees = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Clinic = o
+			}
+		}
+		return nil
+	case "Services":
+		rels, ok := retrieved.(ServiceSlice)
+		if !ok {
+			return fmt.Errorf("clinic cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Services = rels
 
 		for _, rel := range rels {
 			if rel != nil {
@@ -535,6 +589,78 @@ func (os ClinicSlice) LoadClinicEmployees(ctx context.Context, exec bob.Executor
 			rel.R.Clinic = o
 
 			o.R.Employees = append(o.R.Employees, rel)
+		}
+	}
+
+	return nil
+}
+
+func ThenLoadClinicServices(queryMods ...bob.Mod[*dialect.SelectQuery]) mysql.Loader {
+	return mysql.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadClinicServices(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load ClinicServices", retrieved)
+		}
+
+		err := loader.LoadClinicServices(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadClinicServices loads the clinic's Services into the .R struct
+func (o *Clinic) LoadClinicServices(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Services = nil
+
+	related, err := o.Services(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Clinic = o
+	}
+
+	o.R.Services = related
+	return nil
+}
+
+// LoadClinicServices loads the clinic's Services into the .R struct
+func (os ClinicSlice) LoadClinicServices(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	services, err := os.Services(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.Services = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range services {
+			if o.ID != rel.ClinicID {
+				continue
+			}
+
+			rel.R.Clinic = o
+
+			o.R.Services = append(o.R.Services, rel)
 		}
 	}
 
@@ -687,6 +813,72 @@ func (clinic0 *Clinic) AttachEmployees(ctx context.Context, exec bob.Executor, r
 	}
 
 	clinic0.R.Employees = append(clinic0.R.Employees, employees1...)
+
+	for _, rel := range related {
+		rel.R.Clinic = clinic0
+	}
+
+	return nil
+}
+
+func insertClinicServices0(ctx context.Context, exec bob.Executor, services1 []*ServiceSetter, clinic0 *Clinic) (ServiceSlice, error) {
+	for i := range services1 {
+		services1[i].ClinicID = omit.From(clinic0.ID)
+	}
+
+	ret, err := Services.InsertMany(ctx, exec, services1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertClinicServices0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachClinicServices0(ctx context.Context, exec bob.Executor, count int, services1 ServiceSlice, clinic0 *Clinic) (ServiceSlice, error) {
+	setter := &ServiceSetter{
+		ClinicID: omit.From(clinic0.ID),
+	}
+
+	err := Services.Update(ctx, exec, setter, services1...)
+	if err != nil {
+		return nil, fmt.Errorf("attachClinicServices0: %w", err)
+	}
+
+	return services1, nil
+}
+
+func (clinic0 *Clinic) InsertServices(ctx context.Context, exec bob.Executor, related ...*ServiceSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	services1, err := insertClinicServices0(ctx, exec, related, clinic0)
+	if err != nil {
+		return err
+	}
+
+	clinic0.R.Services = append(clinic0.R.Services, services1...)
+
+	for _, rel := range services1 {
+		rel.R.Clinic = clinic0
+	}
+	return nil
+}
+
+func (clinic0 *Clinic) AttachServices(ctx context.Context, exec bob.Executor, related ...*Service) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	services1 := ServiceSlice(related)
+
+	_, err = attachClinicServices0(ctx, exec, len(related), services1, clinic0)
+	if err != nil {
+		return err
+	}
+
+	clinic0.R.Services = append(clinic0.R.Services, services1...)
 
 	for _, rel := range related {
 		rel.R.Clinic = clinic0

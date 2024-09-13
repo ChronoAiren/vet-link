@@ -18,12 +18,13 @@ import (
 	"github.com/stephenafamo/bob/dialect/mysql/um"
 	"github.com/stephenafamo/bob/expr"
 	"github.com/stephenafamo/bob/mods"
+	"github.com/stephenafamo/bob/orm"
 )
 
 // Breed is an object representing the database table.
 type Breed struct {
 	ID          uint32 `db:"id,pk,autoincr" `
-	SpeciesID   uint8  `db:"species_id" `
+	AnimalID    uint8  `db:"animal_id" `
 	Description string `db:"description" `
 
 	R breedR `db:"-" `
@@ -44,7 +45,8 @@ type BreedsStmt = bob.QueryStmt[*Breed, BreedSlice]
 
 // breedR is where relationships are stored.
 type breedR struct {
-	Pets PetSlice // fk_pets_breeds_breed_id
+	Animal *Animal  // fk_breeds_animals_animal_id
+	Pets   PetSlice // fk_pets_breeds_breed_id
 }
 
 // BreedSetter is used for insert/upsert/update operations
@@ -52,7 +54,7 @@ type breedR struct {
 // Generated columns are not included
 type BreedSetter struct {
 	ID          omit.Val[uint32] `db:"id,pk,autoincr" `
-	SpeciesID   omit.Val[uint8]  `db:"species_id" `
+	AnimalID    omit.Val[uint8]  `db:"animal_id" `
 	Description omit.Val[string] `db:"description" `
 }
 
@@ -62,8 +64,8 @@ func (s BreedSetter) SetColumns() []string {
 		vals = append(vals, "id")
 	}
 
-	if !s.SpeciesID.IsUnset() {
-		vals = append(vals, "species_id")
+	if !s.AnimalID.IsUnset() {
+		vals = append(vals, "animal_id")
 	}
 
 	if !s.Description.IsUnset() {
@@ -77,8 +79,8 @@ func (s BreedSetter) Overwrite(t *Breed) {
 	if !s.ID.IsUnset() {
 		t.ID, _ = s.ID.Get()
 	}
-	if !s.SpeciesID.IsUnset() {
-		t.SpeciesID, _ = s.SpeciesID.Get()
+	if !s.AnimalID.IsUnset() {
+		t.AnimalID, _ = s.AnimalID.Get()
 	}
 	if !s.Description.IsUnset() {
 		t.Description, _ = s.Description.Get()
@@ -93,10 +95,10 @@ func (s BreedSetter) InsertMod() bob.Mod[*dialect.InsertQuery] {
 		vals[0] = mysql.Arg(s.ID)
 	}
 
-	if s.SpeciesID.IsUnset() {
+	if s.AnimalID.IsUnset() {
 		vals[1] = mysql.Raw("DEFAULT")
 	} else {
-		vals[1] = mysql.Arg(s.SpeciesID)
+		vals[1] = mysql.Arg(s.AnimalID)
 	}
 
 	if s.Description.IsUnset() {
@@ -122,10 +124,10 @@ func (s BreedSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
-	if !s.SpeciesID.IsUnset() {
+	if !s.AnimalID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			mysql.Quote(append(prefix, "species_id")...),
-			mysql.Arg(s.SpeciesID),
+			mysql.Quote(append(prefix, "animal_id")...),
+			mysql.Arg(s.AnimalID),
 		}})
 	}
 
@@ -141,7 +143,7 @@ func (s BreedSetter) Expressions(prefix ...string) []bob.Expression {
 
 type breedColumnNames struct {
 	ID          string
-	SpeciesID   string
+	AnimalID    string
 	Description string
 }
 
@@ -150,7 +152,7 @@ var BreedColumns = buildBreedColumns("breeds")
 type breedColumns struct {
 	tableAlias  string
 	ID          mysql.Expression
-	SpeciesID   mysql.Expression
+	AnimalID    mysql.Expression
 	Description mysql.Expression
 }
 
@@ -166,14 +168,14 @@ func buildBreedColumns(alias string) breedColumns {
 	return breedColumns{
 		tableAlias:  alias,
 		ID:          mysql.Quote(alias, "id"),
-		SpeciesID:   mysql.Quote(alias, "species_id"),
+		AnimalID:    mysql.Quote(alias, "animal_id"),
 		Description: mysql.Quote(alias, "description"),
 	}
 }
 
 type breedWhere[Q mysql.Filterable] struct {
 	ID          mysql.WhereMod[Q, uint32]
-	SpeciesID   mysql.WhereMod[Q, uint8]
+	AnimalID    mysql.WhereMod[Q, uint8]
 	Description mysql.WhereMod[Q, string]
 }
 
@@ -184,14 +186,15 @@ func (breedWhere[Q]) AliasedAs(alias string) breedWhere[Q] {
 func buildBreedWhere[Q mysql.Filterable](cols breedColumns) breedWhere[Q] {
 	return breedWhere[Q]{
 		ID:          mysql.Where[Q, uint32](cols.ID),
-		SpeciesID:   mysql.Where[Q, uint8](cols.SpeciesID),
+		AnimalID:    mysql.Where[Q, uint8](cols.AnimalID),
 		Description: mysql.Where[Q, string](cols.Description),
 	}
 }
 
 type breedJoins[Q dialect.Joinable] struct {
-	typ  string
-	Pets func(context.Context) modAs[Q, petColumns]
+	typ    string
+	Animal func(context.Context) modAs[Q, animalColumns]
+	Pets   func(context.Context) modAs[Q, petColumns]
 }
 
 func (j breedJoins[Q]) aliasedAs(alias string) breedJoins[Q] {
@@ -200,8 +203,9 @@ func (j breedJoins[Q]) aliasedAs(alias string) breedJoins[Q] {
 
 func buildBreedJoins[Q dialect.Joinable](cols breedColumns, typ string) breedJoins[Q] {
 	return breedJoins[Q]{
-		typ:  typ,
-		Pets: breedsJoinPets[Q](cols, typ),
+		typ:    typ,
+		Animal: breedsJoinAnimal[Q](cols, typ),
+		Pets:   breedsJoinPets[Q](cols, typ),
 	}
 }
 
@@ -300,6 +304,25 @@ func (o BreedSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
+func breedsJoinAnimal[Q dialect.Joinable](from breedColumns, typ string) func(context.Context) modAs[Q, animalColumns] {
+	return func(ctx context.Context) modAs[Q, animalColumns] {
+		return modAs[Q, animalColumns]{
+			c: AnimalColumns,
+			f: func(to animalColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Animals.Name(ctx).As(to.Alias())).On(
+						to.ID.EQ(from.AnimalID),
+					))
+				}
+
+				return mods
+			},
+		}
+	}
+}
+
 func breedsJoinPets[Q dialect.Joinable](from breedColumns, typ string) func(context.Context) modAs[Q, petColumns] {
 	return func(ctx context.Context) modAs[Q, petColumns] {
 		return modAs[Q, petColumns]{
@@ -317,6 +340,24 @@ func breedsJoinPets[Q dialect.Joinable](from breedColumns, typ string) func(cont
 			},
 		}
 	}
+}
+
+// Animal starts a query for related objects on animals
+func (o *Breed) Animal(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
+	return Animals.Query(ctx, exec, append(mods,
+		sm.Where(AnimalColumns.ID.EQ(mysql.Arg(o.AnimalID))),
+	)...)
+}
+
+func (os BreedSlice) Animal(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = mysql.ArgGroup(o.AnimalID)
+	}
+
+	return Animals.Query(ctx, exec, append(mods,
+		sm.Where(mysql.Group(AnimalColumns.ID).In(PKArgs...)),
+	)...)
 }
 
 // Pets starts a query for related objects on pets
@@ -343,6 +384,18 @@ func (o *Breed) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "Animal":
+		rel, ok := retrieved.(*Animal)
+		if !ok {
+			return fmt.Errorf("breed cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Animal = rel
+
+		if rel != nil {
+			rel.R.Breeds = BreedSlice{o}
+		}
+		return nil
 	case "Pets":
 		rels, ok := retrieved.(PetSlice)
 		if !ok {
@@ -360,6 +413,94 @@ func (o *Breed) Preload(name string, retrieved any) error {
 	default:
 		return fmt.Errorf("breed has no relationship %q", name)
 	}
+}
+
+func PreloadBreedAnimal(opts ...mysql.PreloadOption) mysql.Preloader {
+	return mysql.Preload[*Animal, AnimalSlice](orm.Relationship{
+		Name: "Animal",
+		Sides: []orm.RelSide{
+			{
+				From: "breeds",
+				To:   TableNames.Animals,
+				ToExpr: func(ctx context.Context) bob.Expression {
+					return Animals.Name(ctx)
+				},
+				FromColumns: []string{
+					ColumnNames.Breeds.AnimalID,
+				},
+				ToColumns: []string{
+					ColumnNames.Animals.ID,
+				},
+			},
+		},
+	}, Animals.Columns().Names(), opts...)
+}
+
+func ThenLoadBreedAnimal(queryMods ...bob.Mod[*dialect.SelectQuery]) mysql.Loader {
+	return mysql.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadBreedAnimal(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load BreedAnimal", retrieved)
+		}
+
+		err := loader.LoadBreedAnimal(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadBreedAnimal loads the breed's Animal into the .R struct
+func (o *Breed) LoadBreedAnimal(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Animal = nil
+
+	related, err := o.Animal(ctx, exec, mods...).One()
+	if err != nil {
+		return err
+	}
+
+	related.R.Breeds = BreedSlice{o}
+
+	o.R.Animal = related
+	return nil
+}
+
+// LoadBreedAnimal loads the breed's Animal into the .R struct
+func (os BreedSlice) LoadBreedAnimal(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	animals, err := os.Animal(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		for _, rel := range animals {
+			if o.AnimalID != rel.ID {
+				continue
+			}
+
+			rel.R.Breeds = append(rel.R.Breeds, o)
+
+			o.R.Animal = rel
+			break
+		}
+	}
+
+	return nil
 }
 
 func ThenLoadBreedPets(queryMods ...bob.Mod[*dialect.SelectQuery]) mysql.Loader {
@@ -430,6 +571,52 @@ func (os BreedSlice) LoadBreedPets(ctx context.Context, exec bob.Executor, mods 
 			o.R.Pets = append(o.R.Pets, rel)
 		}
 	}
+
+	return nil
+}
+
+func attachBreedAnimal0(ctx context.Context, exec bob.Executor, count int, breed0 *Breed, animal1 *Animal) (*Breed, error) {
+	setter := &BreedSetter{
+		AnimalID: omit.From(animal1.ID),
+	}
+
+	err := Breeds.Update(ctx, exec, setter, breed0)
+	if err != nil {
+		return nil, fmt.Errorf("attachBreedAnimal0: %w", err)
+	}
+
+	return breed0, nil
+}
+
+func (breed0 *Breed) InsertAnimal(ctx context.Context, exec bob.Executor, related *AnimalSetter) error {
+	animal1, err := Animals.Insert(ctx, exec, related)
+	if err != nil {
+		return fmt.Errorf("inserting related objects: %w", err)
+	}
+
+	_, err = attachBreedAnimal0(ctx, exec, 1, breed0, animal1)
+	if err != nil {
+		return err
+	}
+
+	breed0.R.Animal = animal1
+
+	animal1.R.Breeds = append(animal1.R.Breeds, breed0)
+
+	return nil
+}
+
+func (breed0 *Breed) AttachAnimal(ctx context.Context, exec bob.Executor, animal1 *Animal) error {
+	var err error
+
+	_, err = attachBreedAnimal0(ctx, exec, 1, breed0, animal1)
+	if err != nil {
+		return err
+	}
+
+	breed0.R.Animal = animal1
+
+	animal1.R.Breeds = append(animal1.R.Breeds, breed0)
 
 	return nil
 }

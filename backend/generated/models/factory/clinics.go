@@ -46,12 +46,17 @@ type ClinicTemplate struct {
 
 type clinicR struct {
 	Employees []*clinicREmployeesR
+	Services  []*clinicRServicesR
 	User      *clinicRUserR
 }
 
 type clinicREmployeesR struct {
 	number int
 	o      *EmployeeTemplate
+}
+type clinicRServicesR struct {
+	number int
+	o      *ServiceTemplate
 }
 type clinicRUserR struct {
 	o *UserTemplate
@@ -114,6 +119,19 @@ func (t ClinicTemplate) setModelRels(o *models.Clinic) {
 			rel = append(rel, related...)
 		}
 		o.R.Employees = rel
+	}
+
+	if t.r.Services != nil {
+		rel := models.ServiceSlice{}
+		for _, r := range t.r.Services {
+			related := r.o.toModels(r.number)
+			for _, rel := range related {
+				rel.ClinicID = o.ID
+				rel.R.Clinic = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Services = rel
 	}
 
 	if t.r.User != nil {
@@ -219,6 +237,21 @@ func (o *ClinicTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 		}
 	}
 
+	if o.r.Services != nil {
+		for _, r := range o.r.Services {
+			var rel1 models.ServiceSlice
+			ctx, rel1, err = r.o.createMany(ctx, exec, r.number)
+			if err != nil {
+				return ctx, err
+			}
+
+			err = m.AttachServices(ctx, exec, rel1...)
+			if err != nil {
+				return ctx, err
+			}
+		}
+	}
+
 	return ctx, err
 }
 
@@ -261,21 +294,21 @@ func (o *ClinicTemplate) create(ctx context.Context, exec bob.Executor) (context
 	opt := o.BuildSetter()
 	ensureCreatableClinic(opt)
 
-	var rel1 *models.User
+	var rel2 *models.User
 	if o.r.User == nil {
 		var ok bool
-		rel1, ok = userCtx.Value(ctx)
+		rel2, ok = userCtx.Value(ctx)
 		if !ok {
 			ClinicMods.WithNewUser().Apply(o)
 		}
 	}
 	if o.r.User != nil {
-		ctx, rel1, err = o.r.User.o.create(ctx, exec)
+		ctx, rel2, err = o.r.User.o.create(ctx, exec)
 		if err != nil {
 			return ctx, nil, err
 		}
 	}
-	opt.UserID = omit.From(rel1.ID)
+	opt.UserID = omit.From(rel2.ID)
 
 	m, err := models.Clinics.Insert(ctx, exec, opt)
 	if err != nil {
@@ -283,7 +316,7 @@ func (o *ClinicTemplate) create(ctx context.Context, exec bob.Executor) (context
 	}
 	ctx = clinicCtx.WithValue(ctx, m)
 
-	m.R.User = rel1
+	m.R.User = rel2
 
 	ctx, err = o.insertOptRels(ctx, exec, m)
 	return ctx, m, err
@@ -564,5 +597,43 @@ func (m clinicMods) AddNewEmployees(number int, mods ...EmployeeMod) ClinicMod {
 func (m clinicMods) WithoutEmployees() ClinicMod {
 	return ClinicModFunc(func(o *ClinicTemplate) {
 		o.r.Employees = nil
+	})
+}
+
+func (m clinicMods) WithServices(number int, related *ServiceTemplate) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		o.r.Services = []*clinicRServicesR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m clinicMods) WithNewServices(number int, mods ...ServiceMod) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		related := o.f.NewService(mods...)
+		m.WithServices(number, related).Apply(o)
+	})
+}
+
+func (m clinicMods) AddServices(number int, related *ServiceTemplate) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		o.r.Services = append(o.r.Services, &clinicRServicesR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m clinicMods) AddNewServices(number int, mods ...ServiceMod) ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		related := o.f.NewService(mods...)
+		m.AddServices(number, related).Apply(o)
+	})
+}
+
+func (m clinicMods) WithoutServices() ClinicMod {
+	return ClinicModFunc(func(o *ClinicTemplate) {
+		o.r.Services = nil
 	})
 }

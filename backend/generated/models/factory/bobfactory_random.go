@@ -5,6 +5,7 @@ package factory
 
 import (
 	"strings"
+	"time"
 
 	"github.com/jaswdr/faker/v2"
 )
@@ -17,6 +18,17 @@ func random_string(f *faker.Faker) string {
 	}
 
 	return strings.Join(f.Lorem().Words(f.IntBetween(1, 5)), " ")
+}
+
+func random_time_Time(f *faker.Faker) time.Time {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	year := time.Hour * 24 * 365
+	min := time.Now().Add(-year)
+	max := time.Now().Add(year)
+	return f.Time().TimeBetween(min, max)
 }
 
 func random_uint32(f *faker.Faker) uint32 {

@@ -13,35 +13,45 @@ import (
 )
 
 var TableNames = struct {
+	Animals   string
 	Breeds    string
 	Clinics   string
 	Employees string
 	Pets      string
 	Roles     string
-	Species   string
+	Services  string
+	Timeslots string
 	Users     string
 }{
+	Animals:   "animals",
 	Breeds:    "breeds",
 	Clinics:   "clinics",
 	Employees: "employees",
 	Pets:      "pets",
 	Roles:     "roles",
-	Species:   "species",
+	Services:  "services",
+	Timeslots: "timeslots",
 	Users:     "users",
 }
 
 var ColumnNames = struct {
+	Animals   animalColumnNames
 	Breeds    breedColumnNames
 	Clinics   clinicColumnNames
 	Employees employeeColumnNames
 	Pets      petColumnNames
 	Roles     roleColumnNames
-	Species   specyColumnNames
+	Services  serviceColumnNames
+	Timeslots timeslotColumnNames
 	Users     userColumnNames
 }{
+	Animals: animalColumnNames{
+		ID:          "id",
+		Description: "description",
+	},
 	Breeds: breedColumnNames{
 		ID:          "id",
-		SpeciesID:   "species_id",
+		AnimalID:    "animal_id",
 		Description: "description",
 	},
 	Clinics: clinicColumnNames{
@@ -68,14 +78,20 @@ var ColumnNames = struct {
 		ID:          "id",
 		Description: "description",
 	},
-	Species: specyColumnNames{
+	Services: serviceColumnNames{
 		ID:          "id",
+		ClinicID:    "clinic_id",
 		Description: "description",
+	},
+	Timeslots: timeslotColumnNames{
+		ID:        "id",
+		VetID:     "vet_id",
+		StartTime: "start_time",
 	},
 	Users: userColumnNames{
 		ID:         "id",
-		GivenName:  "given_name",
 		FamilyName: "family_name",
+		GivenName:  "given_name",
 		Email:      "email",
 		Password:   "password",
 		RoleID:     "role_id",
@@ -89,29 +105,35 @@ var (
 )
 
 func Where[Q mysql.Filterable]() struct {
+	Animals   animalWhere[Q]
 	Breeds    breedWhere[Q]
 	Clinics   clinicWhere[Q]
 	Employees employeeWhere[Q]
 	Pets      petWhere[Q]
 	Roles     roleWhere[Q]
-	Species   specyWhere[Q]
+	Services  serviceWhere[Q]
+	Timeslots timeslotWhere[Q]
 	Users     userWhere[Q]
 } {
 	return struct {
+		Animals   animalWhere[Q]
 		Breeds    breedWhere[Q]
 		Clinics   clinicWhere[Q]
 		Employees employeeWhere[Q]
 		Pets      petWhere[Q]
 		Roles     roleWhere[Q]
-		Species   specyWhere[Q]
+		Services  serviceWhere[Q]
+		Timeslots timeslotWhere[Q]
 		Users     userWhere[Q]
 	}{
+		Animals:   buildAnimalWhere[Q](AnimalColumns),
 		Breeds:    buildBreedWhere[Q](BreedColumns),
 		Clinics:   buildClinicWhere[Q](ClinicColumns),
 		Employees: buildEmployeeWhere[Q](EmployeeColumns),
 		Pets:      buildPetWhere[Q](PetColumns),
 		Roles:     buildRoleWhere[Q](RoleColumns),
-		Species:   buildSpecyWhere[Q](SpecyColumns),
+		Services:  buildServiceWhere[Q](ServiceColumns),
+		Timeslots: buildTimeslotWhere[Q](TimeslotColumns),
 		Users:     buildUserWhere[Q](UserColumns),
 	}
 }
@@ -137,11 +159,14 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 }
 
 type joins[Q dialect.Joinable] struct {
+	Animals   joinSet[animalJoins[Q]]
 	Breeds    joinSet[breedJoins[Q]]
 	Clinics   joinSet[clinicJoins[Q]]
 	Employees joinSet[employeeJoins[Q]]
 	Pets      joinSet[petJoins[Q]]
 	Roles     joinSet[roleJoins[Q]]
+	Services  joinSet[serviceJoins[Q]]
+	Timeslots joinSet[timeslotJoins[Q]]
 	Users     joinSet[userJoins[Q]]
 }
 
@@ -155,11 +180,14 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
+		Animals:   buildJoinSet[animalJoins[Q]](AnimalColumns, buildAnimalJoins),
 		Breeds:    buildJoinSet[breedJoins[Q]](BreedColumns, buildBreedJoins),
 		Clinics:   buildJoinSet[clinicJoins[Q]](ClinicColumns, buildClinicJoins),
 		Employees: buildJoinSet[employeeJoins[Q]](EmployeeColumns, buildEmployeeJoins),
 		Pets:      buildJoinSet[petJoins[Q]](PetColumns, buildPetJoins),
 		Roles:     buildJoinSet[roleJoins[Q]](RoleColumns, buildRoleJoins),
+		Services:  buildJoinSet[serviceJoins[Q]](ServiceColumns, buildServiceJoins),
+		Timeslots: buildJoinSet[timeslotJoins[Q]](TimeslotColumns, buildTimeslotJoins),
 		Users:     buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
 	}
 }

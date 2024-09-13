@@ -24,8 +24,8 @@ import (
 // User is an object representing the database table.
 type User struct {
 	ID         uint32 `db:"id,pk,autoincr" `
-	GivenName  string `db:"given_name" `
 	FamilyName string `db:"family_name" `
+	GivenName  string `db:"given_name" `
 	Email      string `db:"email,pk" `
 	Password   string `db:"password" `
 	RoleID     uint8  `db:"role_id" `
@@ -48,10 +48,11 @@ type UsersStmt = bob.QueryStmt[*User, UserSlice]
 
 // userR is where relationships are stored.
 type userR struct {
-	Employees EmployeeSlice // fk_employees_users_user_id
-	OwnerPets PetSlice      // fk_pets_users_owner_id
-	Clinics   ClinicSlice   // fk_user_clinics_clinics_user_id
-	Role      *Role         // fk_users_roles_role_id
+	Employees    EmployeeSlice // fk_employees_users_user_id
+	OwnerPets    PetSlice      // fk_pets_users_owner_id
+	VetTimeslots TimeslotSlice // fk_timeslots_users_vet_id
+	Clinics      ClinicSlice   // fk_user_clinics_clinics_user_id
+	Role         *Role         // fk_users_roles_role_id
 }
 
 // UserSetter is used for insert/upsert/update operations
@@ -59,8 +60,8 @@ type userR struct {
 // Generated columns are not included
 type UserSetter struct {
 	ID         omit.Val[uint32] `db:"id,pk,autoincr" `
-	GivenName  omit.Val[string] `db:"given_name" `
 	FamilyName omit.Val[string] `db:"family_name" `
+	GivenName  omit.Val[string] `db:"given_name" `
 	Email      omit.Val[string] `db:"email,pk" `
 	Password   omit.Val[string] `db:"password" `
 	RoleID     omit.Val[uint8]  `db:"role_id" `
@@ -72,12 +73,12 @@ func (s UserSetter) SetColumns() []string {
 		vals = append(vals, "id")
 	}
 
-	if !s.GivenName.IsUnset() {
-		vals = append(vals, "given_name")
-	}
-
 	if !s.FamilyName.IsUnset() {
 		vals = append(vals, "family_name")
+	}
+
+	if !s.GivenName.IsUnset() {
+		vals = append(vals, "given_name")
 	}
 
 	if !s.Email.IsUnset() {
@@ -99,11 +100,11 @@ func (s UserSetter) Overwrite(t *User) {
 	if !s.ID.IsUnset() {
 		t.ID, _ = s.ID.Get()
 	}
-	if !s.GivenName.IsUnset() {
-		t.GivenName, _ = s.GivenName.Get()
-	}
 	if !s.FamilyName.IsUnset() {
 		t.FamilyName, _ = s.FamilyName.Get()
+	}
+	if !s.GivenName.IsUnset() {
+		t.GivenName, _ = s.GivenName.Get()
 	}
 	if !s.Email.IsUnset() {
 		t.Email, _ = s.Email.Get()
@@ -124,16 +125,16 @@ func (s UserSetter) InsertMod() bob.Mod[*dialect.InsertQuery] {
 		vals[0] = mysql.Arg(s.ID)
 	}
 
-	if s.GivenName.IsUnset() {
+	if s.FamilyName.IsUnset() {
 		vals[1] = mysql.Raw("DEFAULT")
 	} else {
-		vals[1] = mysql.Arg(s.GivenName)
+		vals[1] = mysql.Arg(s.FamilyName)
 	}
 
-	if s.FamilyName.IsUnset() {
+	if s.GivenName.IsUnset() {
 		vals[2] = mysql.Raw("DEFAULT")
 	} else {
-		vals[2] = mysql.Arg(s.FamilyName)
+		vals[2] = mysql.Arg(s.GivenName)
 	}
 
 	if s.Email.IsUnset() {
@@ -171,17 +172,17 @@ func (s UserSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
-	if !s.GivenName.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			mysql.Quote(append(prefix, "given_name")...),
-			mysql.Arg(s.GivenName),
-		}})
-	}
-
 	if !s.FamilyName.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			mysql.Quote(append(prefix, "family_name")...),
 			mysql.Arg(s.FamilyName),
+		}})
+	}
+
+	if !s.GivenName.IsUnset() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			mysql.Quote(append(prefix, "given_name")...),
+			mysql.Arg(s.GivenName),
 		}})
 	}
 
@@ -211,8 +212,8 @@ func (s UserSetter) Expressions(prefix ...string) []bob.Expression {
 
 type userColumnNames struct {
 	ID         string
-	GivenName  string
 	FamilyName string
+	GivenName  string
 	Email      string
 	Password   string
 	RoleID     string
@@ -223,8 +224,8 @@ var UserColumns = buildUserColumns("users")
 type userColumns struct {
 	tableAlias string
 	ID         mysql.Expression
-	GivenName  mysql.Expression
 	FamilyName mysql.Expression
+	GivenName  mysql.Expression
 	Email      mysql.Expression
 	Password   mysql.Expression
 	RoleID     mysql.Expression
@@ -242,8 +243,8 @@ func buildUserColumns(alias string) userColumns {
 	return userColumns{
 		tableAlias: alias,
 		ID:         mysql.Quote(alias, "id"),
-		GivenName:  mysql.Quote(alias, "given_name"),
 		FamilyName: mysql.Quote(alias, "family_name"),
+		GivenName:  mysql.Quote(alias, "given_name"),
 		Email:      mysql.Quote(alias, "email"),
 		Password:   mysql.Quote(alias, "password"),
 		RoleID:     mysql.Quote(alias, "role_id"),
@@ -252,8 +253,8 @@ func buildUserColumns(alias string) userColumns {
 
 type userWhere[Q mysql.Filterable] struct {
 	ID         mysql.WhereMod[Q, uint32]
-	GivenName  mysql.WhereMod[Q, string]
 	FamilyName mysql.WhereMod[Q, string]
+	GivenName  mysql.WhereMod[Q, string]
 	Email      mysql.WhereMod[Q, string]
 	Password   mysql.WhereMod[Q, string]
 	RoleID     mysql.WhereMod[Q, uint8]
@@ -266,8 +267,8 @@ func (userWhere[Q]) AliasedAs(alias string) userWhere[Q] {
 func buildUserWhere[Q mysql.Filterable](cols userColumns) userWhere[Q] {
 	return userWhere[Q]{
 		ID:         mysql.Where[Q, uint32](cols.ID),
-		GivenName:  mysql.Where[Q, string](cols.GivenName),
 		FamilyName: mysql.Where[Q, string](cols.FamilyName),
+		GivenName:  mysql.Where[Q, string](cols.GivenName),
 		Email:      mysql.Where[Q, string](cols.Email),
 		Password:   mysql.Where[Q, string](cols.Password),
 		RoleID:     mysql.Where[Q, uint8](cols.RoleID),
@@ -275,11 +276,12 @@ func buildUserWhere[Q mysql.Filterable](cols userColumns) userWhere[Q] {
 }
 
 type userJoins[Q dialect.Joinable] struct {
-	typ       string
-	Employees func(context.Context) modAs[Q, employeeColumns]
-	OwnerPets func(context.Context) modAs[Q, petColumns]
-	Clinics   func(context.Context) modAs[Q, clinicColumns]
-	Role      func(context.Context) modAs[Q, roleColumns]
+	typ          string
+	Employees    func(context.Context) modAs[Q, employeeColumns]
+	OwnerPets    func(context.Context) modAs[Q, petColumns]
+	VetTimeslots func(context.Context) modAs[Q, timeslotColumns]
+	Clinics      func(context.Context) modAs[Q, clinicColumns]
+	Role         func(context.Context) modAs[Q, roleColumns]
 }
 
 func (j userJoins[Q]) aliasedAs(alias string) userJoins[Q] {
@@ -288,11 +290,12 @@ func (j userJoins[Q]) aliasedAs(alias string) userJoins[Q] {
 
 func buildUserJoins[Q dialect.Joinable](cols userColumns, typ string) userJoins[Q] {
 	return userJoins[Q]{
-		typ:       typ,
-		Employees: usersJoinEmployees[Q](cols, typ),
-		OwnerPets: usersJoinOwnerPets[Q](cols, typ),
-		Clinics:   usersJoinClinics[Q](cols, typ),
-		Role:      usersJoinRole[Q](cols, typ),
+		typ:          typ,
+		Employees:    usersJoinEmployees[Q](cols, typ),
+		OwnerPets:    usersJoinOwnerPets[Q](cols, typ),
+		VetTimeslots: usersJoinVetTimeslots[Q](cols, typ),
+		Clinics:      usersJoinClinics[Q](cols, typ),
+		Role:         usersJoinRole[Q](cols, typ),
 	}
 }
 
@@ -442,6 +445,25 @@ func usersJoinOwnerPets[Q dialect.Joinable](from userColumns, typ string) func(c
 	}
 }
 
+func usersJoinVetTimeslots[Q dialect.Joinable](from userColumns, typ string) func(context.Context) modAs[Q, timeslotColumns] {
+	return func(ctx context.Context) modAs[Q, timeslotColumns] {
+		return modAs[Q, timeslotColumns]{
+			c: TimeslotColumns,
+			f: func(to timeslotColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Timeslots.Name(ctx).As(to.Alias())).On(
+						to.VetID.EQ(from.ID),
+					))
+				}
+
+				return mods
+			},
+		}
+	}
+}
+
 func usersJoinClinics[Q dialect.Joinable](from userColumns, typ string) func(context.Context) modAs[Q, clinicColumns] {
 	return func(ctx context.Context) modAs[Q, clinicColumns] {
 		return modAs[Q, clinicColumns]{
@@ -516,6 +538,24 @@ func (os UserSlice) OwnerPets(ctx context.Context, exec bob.Executor, mods ...bo
 	)...)
 }
 
+// VetTimeslots starts a query for related objects on timeslots
+func (o *User) VetTimeslots(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TimeslotsQuery {
+	return Timeslots.Query(ctx, exec, append(mods,
+		sm.Where(TimeslotColumns.VetID.EQ(mysql.Arg(o.ID))),
+	)...)
+}
+
+func (os UserSlice) VetTimeslots(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TimeslotsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = mysql.ArgGroup(o.ID)
+	}
+
+	return Timeslots.Query(ctx, exec, append(mods,
+		sm.Where(mysql.Group(TimeslotColumns.VetID).In(PKArgs...)),
+	)...)
+}
+
 // Clinics starts a query for related objects on clinics
 func (o *User) Clinics(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) ClinicsQuery {
 	return Clinics.Query(ctx, exec, append(mods,
@@ -583,6 +623,20 @@ func (o *User) Preload(name string, retrieved any) error {
 		for _, rel := range rels {
 			if rel != nil {
 				rel.R.OwnerUser = o
+			}
+		}
+		return nil
+	case "VetTimeslots":
+		rels, ok := retrieved.(TimeslotSlice)
+		if !ok {
+			return fmt.Errorf("user cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.VetTimeslots = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.VetUser = o
 			}
 		}
 		return nil
@@ -755,6 +809,78 @@ func (os UserSlice) LoadUserOwnerPets(ctx context.Context, exec bob.Executor, mo
 			rel.R.OwnerUser = o
 
 			o.R.OwnerPets = append(o.R.OwnerPets, rel)
+		}
+	}
+
+	return nil
+}
+
+func ThenLoadUserVetTimeslots(queryMods ...bob.Mod[*dialect.SelectQuery]) mysql.Loader {
+	return mysql.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadUserVetTimeslots(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load UserVetTimeslots", retrieved)
+		}
+
+		err := loader.LoadUserVetTimeslots(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadUserVetTimeslots loads the user's VetTimeslots into the .R struct
+func (o *User) LoadUserVetTimeslots(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.VetTimeslots = nil
+
+	related, err := o.VetTimeslots(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.VetUser = o
+	}
+
+	o.R.VetTimeslots = related
+	return nil
+}
+
+// LoadUserVetTimeslots loads the user's VetTimeslots into the .R struct
+func (os UserSlice) LoadUserVetTimeslots(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	timeslots, err := os.VetTimeslots(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.VetTimeslots = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range timeslots {
+			if o.ID != rel.VetID {
+				continue
+			}
+
+			rel.R.VetUser = o
+
+			o.R.VetTimeslots = append(o.R.VetTimeslots, rel)
 		}
 	}
 
@@ -1048,6 +1174,72 @@ func (user0 *User) AttachOwnerPets(ctx context.Context, exec bob.Executor, relat
 
 	for _, rel := range related {
 		rel.R.OwnerUser = user0
+	}
+
+	return nil
+}
+
+func insertUserVetTimeslots0(ctx context.Context, exec bob.Executor, timeslots1 []*TimeslotSetter, user0 *User) (TimeslotSlice, error) {
+	for i := range timeslots1 {
+		timeslots1[i].VetID = omit.From(user0.ID)
+	}
+
+	ret, err := Timeslots.InsertMany(ctx, exec, timeslots1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertUserVetTimeslots0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachUserVetTimeslots0(ctx context.Context, exec bob.Executor, count int, timeslots1 TimeslotSlice, user0 *User) (TimeslotSlice, error) {
+	setter := &TimeslotSetter{
+		VetID: omit.From(user0.ID),
+	}
+
+	err := Timeslots.Update(ctx, exec, setter, timeslots1...)
+	if err != nil {
+		return nil, fmt.Errorf("attachUserVetTimeslots0: %w", err)
+	}
+
+	return timeslots1, nil
+}
+
+func (user0 *User) InsertVetTimeslots(ctx context.Context, exec bob.Executor, related ...*TimeslotSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	timeslots1, err := insertUserVetTimeslots0(ctx, exec, related, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.VetTimeslots = append(user0.R.VetTimeslots, timeslots1...)
+
+	for _, rel := range timeslots1 {
+		rel.R.VetUser = user0
+	}
+	return nil
+}
+
+func (user0 *User) AttachVetTimeslots(ctx context.Context, exec bob.Executor, related ...*Timeslot) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	timeslots1 := TimeslotSlice(related)
+
+	_, err = attachUserVetTimeslots0(ctx, exec, len(related), timeslots1, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.VetTimeslots = append(user0.R.VetTimeslots, timeslots1...)
+
+	for _, rel := range related {
+		rel.R.VetUser = user0
 	}
 
 	return nil

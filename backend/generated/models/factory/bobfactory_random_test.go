@@ -5,17 +5,6 @@ package factory
 
 import "testing"
 
-func TestRandom_uint32(t *testing.T) {
-	t.Parallel()
-
-	val1 := random_uint32(nil)
-	val2 := random_uint32(nil)
-
-	if val1 == val2 {
-		t.Fatalf("random_uint32() returned the same value twice: %v", val1)
-	}
-}
-
 func TestRandom_uint8(t *testing.T) {
 	t.Parallel()
 
@@ -35,5 +24,27 @@ func TestRandom_string(t *testing.T) {
 
 	if val1 == val2 {
 		t.Fatalf("random_string() returned the same value twice: %v", val1)
+	}
+}
+
+func TestRandom_uint32(t *testing.T) {
+	t.Parallel()
+
+	val1 := random_uint32(nil)
+	val2 := random_uint32(nil)
+
+	if val1 == val2 {
+		t.Fatalf("random_uint32() returned the same value twice: %v", val1)
+	}
+}
+
+func TestRandom_time_Time(t *testing.T) {
+	t.Parallel()
+
+	val1 := random_time_Time(nil)
+	val2 := random_time_Time(nil)
+
+	if val1.Equal(val2) {
+		t.Fatalf("random_time_Time() returned the same value twice: %v", val1)
 	}
 }
