@@ -31,16 +31,23 @@ class CustomDropdown extends StatefulWidget {
 }
 
 class _CustomDropdownState extends State<CustomDropdown> {
-  String? selectedItem;
+  String? _selectedItem;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize _selectedItem with controller.text if controller is provided
+    _selectedItem = widget.controller?.text;
+  }
 
   @override
   void didUpdateWidget(covariant CustomDropdown oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If the dropdown items change, reset the selectedItem
-    if (oldWidget.dropdownItems != widget.dropdownItems) {
+    // Update _selectedItem if the controller text changes
+    if (widget.controller != oldWidget.controller) {
       setState(() {
-        selectedItem = null; // Reset the selected item
+        _selectedItem = widget.controller?.text;
       });
     }
   }
@@ -50,13 +57,17 @@ class _CustomDropdownState extends State<CustomDropdown> {
     return DropdownButtonFormField<String>(
       menuMaxHeight: 200,
       isExpanded: true,
-      value: selectedItem,
+      value: _selectedItem,
       onChanged: widget.enabled
           ? (String? newValue) {
               setState(() {
-                selectedItem = newValue;
+                _selectedItem = newValue;
               });
-              widget.controller?.text = newValue ?? "";
+
+              // Update controller's text when dropdown value changes
+              if (widget.controller != null) {
+                widget.controller!.text = newValue ?? '';
+              }
             }
           : null,
       validator: widget.validator,
