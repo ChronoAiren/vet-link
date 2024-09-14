@@ -51,7 +51,7 @@ class AddPetController extends GetxController {
   void changeOptionsFor(String selectedSpecies) {
     species.value = selectedSpecies;
     breedField.clear();
-    breedOptions.value = selectedSpecies == 'Dog' ? dogBreed : catBreed;
+    breedOptions.value = selectedSpecies == 'DOG' ? dogBreed : catBreed;
   }
 
   Future<void> getCatBreeds() async {
@@ -170,7 +170,9 @@ class AddPetController extends GetxController {
           );
 
           final updatedPet = Pet.fromJson(response.data);
-          //update ui list
+          int index = _viewPetsController.pets
+              .indexWhere((p) => p.id == selectedPet!.id);
+          _viewPetsController.pets[index] = updatedPet;
           Get.back(); //hide dialog
           Get.back(); //hide form
           Get.snackbar(

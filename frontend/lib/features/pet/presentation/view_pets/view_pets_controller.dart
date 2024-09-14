@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/common/controllers/session_controller.dart';
+import 'package:frontend/features/pet/domain/breed/breed_model.dart';
 import 'package:frontend/features/pet/domain/pet/pet_model.dart';
 import 'package:frontend/utils/dio/dio_client.dart';
 import 'package:get/get.dart';

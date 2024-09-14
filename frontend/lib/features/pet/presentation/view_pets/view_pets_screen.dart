@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
+import 'package:frontend/features/pet/domain/breed/breed_model.dart';
+import 'package:frontend/features/pet/domain/pet/pet_model.dart';
 import 'package:frontend/features/pet/presentation/add_update_pet/add_update_pet_screen.dart';
 import 'package:frontend/features/pet/presentation/view_pets/view_pets_controller.dart';
 import 'package:frontend/styles/dark_theme.dart';

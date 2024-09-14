@@ -32,11 +32,11 @@ class AddPetScreen extends StatelessWidget {
                     children: [
                       Obx(
                         () => Radio(
-                          value: 'Dog',
+                          value: 'DOG',
                           groupValue: controller.species.value,
                           onChanged: (value) {
                             controller.species.value = value!;
-                            controller.changeOptionsFor('Dog');
+                            controller.changeOptionsFor('DOG');
                           },
                         ),
                       ),
@@ -53,11 +53,11 @@ class AddPetScreen extends StatelessWidget {
                     children: [
                       Obx(
                         () => Radio(
-                          value: 'Cat',
+                          value: 'CAT',
                           groupValue: controller.species.value,
                           onChanged: (value) {
                             controller.species.value = value!;
-                            controller.changeOptionsFor('Cat');
+                            controller.changeOptionsFor('CAT');
                           },
                         ),
                       ),
@@ -91,14 +91,12 @@ class AddPetScreen extends StatelessWidget {
             const SizedBox(
               height: 15.0,
             ),
-            Obx(
-              () => CustomDropdown(
-                controller: controller.breedField,
-                dropdownItems:
-                    controller.breedOptions.map((e) => e.breed).toList(),
-                labelText: 'Breed',
-                validator: Validator().notEmpty,
-              ),
+            CustomDropdown(
+              controller: controller.breedField,
+              dropdownItems:
+                  controller.breedOptions.map((e) => e.breed).toList(),
+              labelText: 'Breed',
+              validator: Validator().notEmpty,
             ),
             const SizedBox(
               height: 15.0,
