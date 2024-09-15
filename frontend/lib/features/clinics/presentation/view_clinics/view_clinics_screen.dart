@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/widgets/main_wrapper.dart';
-import 'package:frontend/features/veterinarians/presentation/view%20veterinarians/view_veterinarians_screen.dart';
+import 'package:frontend/features/veterinarians/presentation/view%20veterinarians/view_veterinarians_po_screen.dart';
 import 'package:get/get.dart';
 
 
@@ -85,9 +85,7 @@ class ViewClinicsScreen extends StatelessWidget {
                     );
                   },
                   onDismissed: (direction) {
-                        // Perform the delete operation
                         clinics.removeAt(index);
-                        // Optionally, show a snackbar to indicate successful deletion
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
@@ -99,7 +97,7 @@ class ViewClinicsScreen extends StatelessWidget {
                   onTap: (){
                     Navigator.push(context,
                     MaterialPageRoute(
-                builder: (context) => ViewVeterinariansScreen(selectedClinic : clinics[index]['clinic']!.obs ),
+                builder: (context) => ViewVeterinariansPoScreen(selectedClinic : clinics[index]['clinic']!.obs ),
              
               ),
             );
@@ -121,6 +119,7 @@ class ViewClinicsScreen extends StatelessWidget {
                     // );
                   },
                    title: Text(clinics[index]['clinic']!),
+                   
                  )
                  );
               },
