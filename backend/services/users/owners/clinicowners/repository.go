@@ -86,6 +86,11 @@ type InsertClinicParams struct {
 	BusinessNo string `json:"businessNo" path:"businessNo" query:"businessNo" form:"businessNo"`
 }
 
+type CreateServiceRequest struct {
+	ID          uint32 `json:"id" param:"id" query:"id" form:"id"`
+	Description string `json:"service" param:"service" query:"service" form:"service"`
+}
+
 func (r *CreateRequest) GetInsertClinicParams() (*InsertClinicParams, error) {
 	if r.User == nil {
 		log.Println(r.User)

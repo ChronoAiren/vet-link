@@ -10,6 +10,65 @@ import (
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
 )
 
+func (s *Service) handleReadAllService(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	type listClinicServiceRequest struct {
+		ClinicID uint32 `json:"id" param:"id" query:"id" form:"id"`
+	}
+	params := new(listClinicServiceRequest)
+	if e := c.Api.Bind(params); e != nil {
+		err <- e
+		return
+	} else if services, e := models.Services.Query(
+		c.GetContext(), s.Store.Db,
+		models.SelectWhere.Services.ClinicID.EQ(params.ClinicID),
+	).All(); e != nil {
+		err <- e
+	} else {
+		var servicesDto []ServiceDTO
+		for _, service := range services {
+			servicesDto = append(servicesDto, ServiceDTO{
+				ID:       service.ID,
+				ClinicID: service.ClinicID,
+				Service:  service.Description,
+			})
+		}
+		data <- servicesDto
+	}
+}
+
+func (s *Service) handleCreateService(c *my.Context, data my.ResultChan, err my.ErrorChan) {
+	params := new(CreateServiceRequest)
+	if e := c.Api.Bind(params); e != nil {
+		err <- e
+	} else if e = s.Store.Transact(c.GetContext(), func(tx *bob.Tx) error {
+		if clinic, e := models.Clinics.Query(c.GetContext(), tx,
+			models.SelectWhere.Clinics.ID.EQ(params.ID),
+		).One(); e != nil {
+			return e
+		} else if service, e := models.Services.Insert(c.GetContext(), tx, &models.ServiceSetter{
+			ClinicID:    omit.From(clinic.ID),
+			Description: omit.From(params.Description),
+		}); e != nil {
+			return e
+		} else {
+			data <- &ServiceDTO{
+				ID:       service.ID,
+				ClinicID: service.ClinicID,
+				Service:  service.Description,
+			}
+			return nil
+		}
+	}); e != nil {
+		err <- e
+	}
+}
+
+type ServiceDTO struct {
+	ID       uint32 `json:"id"`
+	ClinicID uint32 `json:"clinicId"`
+	Service  string `json:"service"`
+}
+
 func (s *Service) handleReadAll(c *my.Context, data my.ResultChan, err my.ErrorChan) {
 	params := new(ListClinicOwnersRequest)
 	if e := c.Api.Bind(params); e != nil {

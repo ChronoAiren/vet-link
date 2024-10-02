@@ -21,5 +21,7 @@ func (s *Service) Serve(f *framework.Framework) {
 	f.Mux().Get("/clinic-owners", s.handleReadAll)
 	f.Mux().Get("/clinic-owners/:id", s.handleRead)
 	f.Mux().Post("/clinic-owners", s.handleCreate)
+	f.Mux().Get("/clinic-owners/:id/services", s.handleReadAllService)
+	f.Mux().Post("/clinic-owners/:id/services", s.handleCreateService)
 	f.Mux().Post("/clinic-owners/:id/verify", s.handleVerify)
 }
