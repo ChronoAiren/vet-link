@@ -19,5 +19,6 @@ func (s *Service) Inject(db *store.Store, f *framework.Framework) {
 
 func (s *Service) Serve(f *framework.Framework) {
 	f.Mux().Get("/employees/:clinicId", s.handleReadAll)
+	f.Mux().Get("/employees/:clinicId/:type", s.handleReadType)
 	f.Mux().Post("/employees/:type", s.handleCreate)
 }
